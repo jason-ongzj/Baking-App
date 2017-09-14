@@ -30,26 +30,26 @@ public class BakingDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_INGREDIENTS_TABLE =
 
                 "CREATE TABLE " + BakingContract.BakingEntry.INGREDIENTS_TABLE + " (" +
-                        BakingContract.BakingEntry._ID + " INT NOT NULL, " +
+                        BakingContract.BakingEntry.RECIPE_INGREDIENT + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_RECIPE_NAME + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_INGREDIENTS + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_QUANTITY + " REAL NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_MEASURE + " TEXT NOT NULL);";
 
-        final String SQL_CREATE_INFORMATION_TABLE =
+        final String SQL_CREATE_STEPS_TABLE =
 
-                "CREATE TABLE " + BakingContract.BakingEntry.INFORMATION_TABLE + " (" +
-                        BakingContract.BakingEntry._ID  + " INT NOT NULL, " +
+                "CREATE TABLE " + BakingContract.BakingEntry.STEPS_TABLE + " (" +
+                        BakingContract.BakingEntry.RECIPE_STEP  + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_RECIPE_NAME + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_SHORT_DESCRIPTION + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_DESCRIPTION + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_VIDEO_URL + " TEXT NOT NULL, " +
                         BakingContract.BakingEntry.COLUMN_THUMBNAIL_URL + " TEXT NOT NULL, " +
-                        BakingContract.BakingEntry.COLUMN_STEP_NO + " TEXT NOT NULL);";
+                        BakingContract.BakingEntry.COLUMN_STEP_ID + " INT NOT NULL);";
 
         db.execSQL(SQL_CREATE_RECIPES_TABLE);
         db.execSQL(SQL_CREATE_INGREDIENTS_TABLE);
-        db.execSQL(SQL_CREATE_INFORMATION_TABLE);
+        db.execSQL(SQL_CREATE_STEPS_TABLE);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class BakingContract {
 
     public static final String PATH_RECIPES = "recipes";
     public static final String PATH_INGREDIENTS = "ingredients";
-    public static final String PATH_INFORMATION = "info";
+    public static final String PATH_STEPS = "info";
 
     public static final class BakingEntry implements BaseColumns {
         public static final Uri RECIPE_URI = BASE_CONTENT_URI.buildUpon()
@@ -26,8 +26,8 @@ public class BakingContract {
                 .appendPath(PATH_INGREDIENTS)
                 .build();
 
-        public static final Uri INFORMATION_URI = BASE_CONTENT_URI.buildUpon()
-                .appendPath(PATH_INFORMATION)
+        public static final Uri STEPS_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_STEPS)
                 .build();
 
         // 1st table
@@ -38,17 +38,19 @@ public class BakingContract {
 
         // 2nd table, recipe name to be included, table to start with _id
         public static final String INGREDIENTS_TABLE = "ingredients";
+        public static final String RECIPE_INGREDIENT = "recipeIngredient";
         public static final String COLUMN_INGREDIENTS = "ingredient";
         public static final String COLUMN_QUANTITY = "quantity";
         public static final String COLUMN_MEASURE = "measure";
 
         // 3rd table, recipe name to be included, table to start with _id
-        public static final String INFORMATION_TABLE = "information";
+        public static final String STEPS_TABLE = "steps";
+        public static final String RECIPE_STEP = "recipeStep";
         public static final String COLUMN_SHORT_DESCRIPTION = "shortDescription";
         public static final String COLUMN_DESCRIPTION = "description";
         public static final String COLUMN_VIDEO_URL = "videoURL";
         public static final String COLUMN_THUMBNAIL_URL = "thumbnailURL";
         // Note that step number in this case refers to JSON identifier of "id"
-        public static final String COLUMN_STEP_NO = "stepId";
+        public static final String COLUMN_STEP_ID = "stepId";
     }
 }

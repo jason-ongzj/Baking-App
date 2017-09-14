@@ -1,5 +1,7 @@
 package com.example.android.bakingapp.utils;
 
+import android.util.Log;
+
 import com.example.android.bakingapp.BakingRecipe;
 import com.example.android.bakingapp.Ingredients;
 import com.example.android.bakingapp.RecipeSteps;
@@ -10,11 +12,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-/**
- * Created by Ben on 9/14/2017.
- */
-
-public class BakingDBUtils {
+public class BakingDbUtils {
 
     public static final String TAG = "BakingDBUtils";
 
@@ -24,21 +22,25 @@ public class BakingDBUtils {
         for(int i = 0; i < jsonArray.length(); i++){
             BakingRecipe recipe = new BakingRecipe();
             JSONObject recipeJSON = jsonArray.getJSONObject(i);
+            recipe.id = recipeJSON.getInt("id");
+            recipe.name = recipeJSON.getString("name");
+            recipe.servings = recipeJSON.getInt("servings");
+            recipe.image = recipeJSON.getString("image");
             String ingredientsJSON = recipeJSON.getString("ingredients");
             String stepsJSON = recipeJSON.getString("steps");
 
             getIngredientsFromJSON(ingredientsJSON, recipe);
             getStepsFromJSON(stepsJSON, recipe);
-//            Log.d(TAG, recipeJSON.toString());
-//            Log.d(TAG, ingredientsJSON);
-//            Log.d(TAG, recipe.ingredientsList.get(1).getQuantity());
-//            Log.d(TAG, recipe.ingredientsList.get(1).getIngredient());
-//            Log.d(TAG, recipe.ingredientsList.get(1).getMeasure());
-//            Log.d(TAG, recipe.stepsList.get(1).getDescription());
-//            Log.d(TAG, recipe.stepsList.get(1).getShortDescription());
-//            Log.d(TAG, Integer.toString(recipe.stepsList.get(1).getStepID()));
-//            Log.d(TAG, recipe.stepsList.get(1).getVideoURL());
-//            Log.d(TAG, recipe.stepsList.get(1).getThumbnailURL());
+            Log.d(TAG, recipeJSON.toString());
+            Log.d(TAG, ingredientsJSON);
+            Log.d(TAG, recipe.ingredientsList.get(1).getQuantity());
+            Log.d(TAG, recipe.ingredientsList.get(1).getIngredient());
+            Log.d(TAG, recipe.ingredientsList.get(1).getMeasure());
+            Log.d(TAG, recipe.stepsList.get(1).getDescription());
+            Log.d(TAG, recipe.stepsList.get(1).getShortDescription());
+            Log.d(TAG, Integer.toString(recipe.stepsList.get(1).getStepID()));
+            Log.d(TAG, recipe.stepsList.get(1).getVideoURL());
+            Log.d(TAG, recipe.stepsList.get(1).getThumbnailURL());
             bakingRecipes.add(i, recipe);
         }
         return bakingRecipes;
@@ -70,7 +72,7 @@ public class BakingDBUtils {
             String videoURL = stepJSON.getString("videoURL");
             String thumbnailURL = stepJSON.getString("thumbnailURL");
             RecipeSteps recipeStep = new RecipeSteps(stepId, shortDescription, description,
-                                        videoURL, thumbnailURL);
+                    videoURL, thumbnailURL);
 
             stepsList.add(i, recipeStep);
         }

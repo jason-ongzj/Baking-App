@@ -1,13 +1,15 @@
 package com.example.android.bakingapp;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.example.android.bakingapp.data.BakingContract;
 import com.example.android.bakingapp.data.BakingDbHelper;
-import com.example.android.bakingapp.utils.BakingDBUtils;
+import com.example.android.bakingapp.utils.BakingDbUtils;
 
 import org.json.JSONException;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
         mDb = dbHelper.getWritableDatabase();
 
-        new RetrieveFeedTask().execute();
+        new GetRecipesTask().execute();
     }
 
-    private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    private class GetRecipesTask extends AsyncTask<Void, Void, String> {
         private static final String TAG = "AsyncTask";
         public static final String REQUEST_METHOD = "GET";
         public static final int READ_TIMEOUT = 15000;
@@ -86,11 +89,58 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(String results) {
             try{
-                BakingDBUtils.getRecipesFromJSON(results);
+                ArrayList<BakingRecipe> bakingRecipes = BakingDbUtils.getRecipesFromJSON(results);
+                for (int i = 0; i < bakingRecipes.size(); i++){
+                    BakingRecipe recipe = bakingRecipes.get(i);
+                    addRecipesToDb(recipe);
+                    addIngredientsToDb(recipe);
+                    addStepsToDb(recipe);
+                }
             } catch (JSONException e){
                 e.printStackTrace();
             }
+        }
 
+        private void addRecipesToDb(BakingRecipe recipe){
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(BakingContract.BakingEntry._ID, recipe.id);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_SERVINGS, recipe.servings);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_IMAGE, recipe.image);
+            getContentResolver().insert(BakingContract.BakingEntry.RECIPE_URI, contentValues);
+        }
+
+        private void addIngredientsToDb(BakingRecipe recipe){
+            ArrayList<Ingredients> ingredientsList = recipe.ingredientsList;
+            for(int i = 0; i < ingredientsList.size(); i++){
+                Ingredients ingredient = ingredientsList.get(i);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(BakingContract.BakingEntry.RECIPE_INGREDIENT, recipe.name
+                                + "_" + ingredient.getIngredient());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+                contentValues.put(BakingContract.BakingEntry.COLUMN_INGREDIENTS, ingredient.getIngredient());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_QUANTITY, ingredient.getQuantity());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_MEASURE, ingredient.getMeasure());
+                getContentResolver().insert(BakingContract.BakingEntry.INGREDIENTS_URI, contentValues);
+//                Log.d(TAG, uri.toString());
+            }
+        }
+
+        private void addStepsToDb(BakingRecipe recipe){
+            ArrayList<RecipeSteps> stepsList = recipe.stepsList;
+            for(int i = 0; i < stepsList.size(); i++){
+                RecipeSteps step = stepsList.get(i);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(BakingContract.BakingEntry.RECIPE_STEP, recipe.name
+                        + "_" + Integer.toString(step.getStepID()));
+                contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+                contentValues.put(BakingContract.BakingEntry.COLUMN_SHORT_DESCRIPTION, step.getShortDescription());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_DESCRIPTION, step.getDescription());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_VIDEO_URL, step.getVideoURL());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_THUMBNAIL_URL, step.getThumbnailURL());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_STEP_ID, step.getStepID());
+                getContentResolver().insert(BakingContract.BakingEntry.STEPS_URI, contentValues);
+            }
         }
     }
 }
