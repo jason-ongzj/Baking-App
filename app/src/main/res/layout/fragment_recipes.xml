@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ListView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recipe_list_view"
+        android:padding="16dp"></ListView>
+</LinearLayout>
+<!--<FrameLayout-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:background="@android:color/background_light"-->
+    <!--android:minHeight="?android:attr/listPreferredItemHeight"-->
+    <!--android:orientation="horizontal">-->
+
+<!--<android.support.v7.widget.RecyclerView-->
+
+    <!--android:id="@+id/recyclerView_recipes"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:visibility="visible"></android.support.v7.widget.RecyclerView>-->
+
+<!--</FrameLayout>-->

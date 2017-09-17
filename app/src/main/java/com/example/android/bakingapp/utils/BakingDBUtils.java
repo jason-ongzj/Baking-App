@@ -31,16 +31,16 @@ public class BakingDbUtils {
 
             getIngredientsFromJSON(ingredientsJSON, recipe);
             getStepsFromJSON(stepsJSON, recipe);
-            Log.d(TAG, recipeJSON.toString());
-            Log.d(TAG, ingredientsJSON);
-            Log.d(TAG, recipe.ingredientsList.get(1).getQuantity());
-            Log.d(TAG, recipe.ingredientsList.get(1).getIngredient());
-            Log.d(TAG, recipe.ingredientsList.get(1).getMeasure());
-            Log.d(TAG, recipe.stepsList.get(1).getDescription());
-            Log.d(TAG, recipe.stepsList.get(1).getShortDescription());
-            Log.d(TAG, Integer.toString(recipe.stepsList.get(1).getStepID()));
-            Log.d(TAG, recipe.stepsList.get(1).getVideoURL());
-            Log.d(TAG, recipe.stepsList.get(1).getThumbnailURL());
+            Log.d(TAG, recipe.image.toString());
+//            Log.d(TAG, ingredientsJSON);
+//            Log.d(TAG, recipe.ingredientsList.get(1).getQuantity());
+//            Log.d(TAG, recipe.ingredientsList.get(1).getIngredient());
+//            Log.d(TAG, recipe.ingredientsList.get(1).getMeasure());
+//            Log.d(TAG, recipe.stepsList.get(1).getDescription());
+//            Log.d(TAG, recipe.stepsList.get(1).getShortDescription());
+//            Log.d(TAG, Integer.toString(recipe.stepsList.get(1).getStepID()));
+//            Log.d(TAG, recipe.stepsList.get(1).getVideoURL());
+//            Log.d(TAG, recipe.stepsList.get(1).getThumbnailURL());
             bakingRecipes.add(i, recipe);
         }
         return bakingRecipes;

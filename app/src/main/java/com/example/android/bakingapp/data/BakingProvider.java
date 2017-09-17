@@ -48,8 +48,39 @@ public class BakingProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
-        return null;
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection,
+                        @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        final SQLiteDatabase db = mBakingDbHelper.getReadableDatabase();
+
+        int match = sUriMatcher.match(uri);
+        Cursor retCursor;
+
+        switch(match){
+            case RECIPES:
+                retCursor = db.query(BakingContract.BakingEntry.RECIPE_TABLE,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case RECIPES_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection = "_id=?";
+                String[] mSelectionArgs = new String[]{id};
+                retCursor = db.query(BakingContract.BakingEntry.RECIPE_TABLE,
+                        projection,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        return retCursor;
     }
 
     @Nullable
@@ -103,7 +134,23 @@ public class BakingProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+        final SQLiteDatabase db = mBakingDbHelper.getWritableDatabase();
+
+        int match = sUriMatcher.match(uri);
+        int tasksDeleted = 0;
+
+        switch(match){
+            case RECIPES:
+                tasksDeleted = db.delete(BakingContract.BakingEntry.RECIPE_TABLE, null, null);
+                break;
+            case INGREDIENTS:
+                tasksDeleted = db.delete(BakingContract.BakingEntry.INGREDIENTS_TABLE, null, null);
+                break;
+            case STEPS:
+                tasksDeleted = db.delete(BakingContract.BakingEntry.STEPS_TABLE, null, null);
+                break;
+        }
+        return tasksDeleted;
     }
 
     @Override

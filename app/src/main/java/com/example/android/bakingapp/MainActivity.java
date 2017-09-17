@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.example.android.bakingapp.data.BakingContract;
@@ -23,11 +24,13 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private SQLiteDatabase mDb;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         BakingDbHelper dbHelper = new BakingDbHelper(this);
 
         mDb = dbHelper.getWritableDatabase();
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         new GetRecipesTask().execute();
     }
 
-    private class GetRecipesTask extends AsyncTask<Void, Void, String> {
+    private class GetRecipesTask extends AsyncTask<Void, Void, ArrayList<BakingRecipe>> {
         private static final String TAG = "AsyncTask";
         public static final String REQUEST_METHOD = "GET";
         public static final int READ_TIMEOUT = 15000;
@@ -46,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
         }
 
-        protected String doInBackground(Void... voids) {
+        protected ArrayList<BakingRecipe> doInBackground(Void... voids) {
             Log.d(TAG, "doInBackground: ");
 
             String urlString = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
             HttpURLConnection urlConnection = null;
+            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
 
             try {
                 URL url = new URL(urlString);
@@ -72,9 +76,24 @@ public class MainActivity extends AppCompatActivity {
                 bufferedReader.close();
                 streamReader.close();
 
-                Log.d(TAG, stringBuilder.toString());
+//                Log.d(TAG, stringBuilder.toString());
 
-                return stringBuilder.toString();
+                getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
+                getContentResolver().delete(BakingContract.BakingEntry.INGREDIENTS_URI, null, null);
+                getContentResolver().delete(BakingContract.BakingEntry.STEPS_URI, null, null);
+
+                try{
+                    recipesList = BakingDbUtils.getRecipesFromJSON(stringBuilder.toString());
+                    for (int i = 0; i < recipesList.size(); i++){
+                        BakingRecipe recipe = recipesList.get(i);
+                        addRecipesToDb(recipe);
+                        addIngredientsToDb(recipe);
+                        addStepsToDb(recipe);
+                    }
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
+                return recipesList;
 
             } catch(IOException e) {
                 e.printStackTrace();
@@ -87,18 +106,8 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        protected void onPostExecute(String results) {
-            try{
-                ArrayList<BakingRecipe> bakingRecipes = BakingDbUtils.getRecipesFromJSON(results);
-                for (int i = 0; i < bakingRecipes.size(); i++){
-                    BakingRecipe recipe = bakingRecipes.get(i);
-                    addRecipesToDb(recipe);
-                    addIngredientsToDb(recipe);
-                    addStepsToDb(recipe);
-                }
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
+        protected void onPostExecute(ArrayList<BakingRecipe> recipes) {
+
         }
 
         private void addRecipesToDb(BakingRecipe recipe){
@@ -122,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 contentValues.put(BakingContract.BakingEntry.COLUMN_QUANTITY, ingredient.getQuantity());
                 contentValues.put(BakingContract.BakingEntry.COLUMN_MEASURE, ingredient.getMeasure());
                 getContentResolver().insert(BakingContract.BakingEntry.INGREDIENTS_URI, contentValues);
-//                Log.d(TAG, uri.toString());
             }
         }
 
