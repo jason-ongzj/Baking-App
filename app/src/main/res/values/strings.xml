@@ -5,4 +5,5 @@
     <string name="title_recipestep_list">RecipeSteps</string>
     <string name="title_recipestep_detail">RecipeStep Detail</string>
     <string name="title_activity_recipe_steps">RecipeStepsActivity</string>
+    <string name="title_activity_recipe_display">RecipeDisplayActivity</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.android.bakingapp.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.RecipeDisplayActivity;
 
 import java.util.ArrayList;
 
@@ -65,20 +67,25 @@ public class RecipeListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         TextView textView;
         CardView cardView;
-//        mCursor.moveToPosition(position);
         if (convertView == null) {
             View child = mInflater.inflate(R.layout.item_display, null);
             cardView = (CardView) child.findViewById(R.id.card_display);
             textView = (TextView) child.findViewById(R.id.card_display_text);
-//            if (mRecipes != null)
-//            textView.setText(mCursor.getString(MainActivity.INDEX_RECIPE_NAME));
             textView.setText(mRecipes.get(position));
         } else {
             cardView = (CardView) convertView;
         }
+        cardView.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Intent intent = new Intent(mContext, RecipeDisplayActivity.class);
+                intent.putExtra("recipe", mRecipes.get(position));
+                mContext.startActivity(intent);
+            }
+        });
+
         return cardView;
     }
 }

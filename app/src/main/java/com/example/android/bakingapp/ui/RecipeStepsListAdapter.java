@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.example.android.bakingapp.R;
 public class RecipeStepsListAdapter extends
         RecyclerView.Adapter<RecipeStepsListAdapter.RecipeStepAdapterViewHolder> {
 
+    public static final String TAG = "RecipeStepsListAdapter";
     private Context mContext;
     private Cursor mCursor;
 
@@ -60,6 +62,9 @@ public class RecipeStepsListAdapter extends
 
     public void setCursor(Cursor cursor){
         mCursor = cursor;
+        notifyDataSetChanged();
+        if (mCursor != null)
+        Log.d(TAG, "setCursor: " + cursor.getCount());
     }
 
     public Cursor getCursor(){

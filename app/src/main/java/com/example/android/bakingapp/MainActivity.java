@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity{
 
         protected String doInBackground(Void... voids) {
             Log.d(TAG, "doInBackground: ");
-
+            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
             String urlString = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
             HttpURLConnection urlConnection = null;
 
@@ -85,6 +85,23 @@ public class MainActivity extends AppCompatActivity{
                 bufferedReader.close();
                 streamReader.close();
 
+//                getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
+//                getContentResolver().delete(BakingContract.BakingEntry.INGREDIENTS_URI, null, null);
+//                getContentResolver().delete(BakingContract.BakingEntry.STEPS_URI, null, null);
+//
+//                try{
+//                    recipesList = BakingDbUtils.getRecipesFromJSON(stringBuilder.toString());
+//
+//                    for (int i = 0; i < recipesList.size(); i++){
+//                        BakingRecipe recipe = recipesList.get(i);
+//                        addRecipesToDb(recipe);
+//                        addIngredientsToDb(recipe);
+//                        addStepsToDb(recipe);
+//                    }
+//                } catch (JSONException e){
+//                    e.printStackTrace();
+//                }
+
                 return stringBuilder.toString();
 
 
@@ -101,10 +118,51 @@ public class MainActivity extends AppCompatActivity{
 
         protected void onPostExecute(String response) {
             try{
-                mAdapter.setRecipes(BakingDbUtils.getRecipeNamesFromJSON(response));
                 new AddDataToDb().execute(response);
+                mAdapter.setRecipes(BakingDbUtils.getRecipeNamesFromJSON(response));
             } catch (JSONException e){
                 e.printStackTrace();
+            }
+        }
+
+        private void addRecipesToDb(BakingRecipe recipe){
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(BakingContract.BakingEntry._ID, recipe.id);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_SERVINGS, recipe.servings);
+            contentValues.put(BakingContract.BakingEntry.COLUMN_IMAGE, recipe.image);
+            getContentResolver().insert(BakingContract.BakingEntry.RECIPE_URI, contentValues);
+        }
+
+        private void addIngredientsToDb(BakingRecipe recipe){
+            ArrayList<Ingredients> ingredientsList = recipe.ingredientsList;
+            for(int i = 0; i < ingredientsList.size(); i++){
+                Ingredients ingredient = ingredientsList.get(i);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(BakingContract.BakingEntry.RECIPE_INGREDIENT, recipe.name
+                        + "_" + ingredient.getIngredient());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+                contentValues.put(BakingContract.BakingEntry.COLUMN_INGREDIENTS, ingredient.getIngredient());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_QUANTITY, ingredient.getQuantity());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_MEASURE, ingredient.getMeasure());
+                getContentResolver().insert(BakingContract.BakingEntry.INGREDIENTS_URI, contentValues);
+            }
+        }
+
+        private void addStepsToDb(BakingRecipe recipe){
+            ArrayList<RecipeSteps> stepsList = recipe.stepsList;
+            for(int i = 0; i < stepsList.size(); i++){
+                RecipeSteps step = stepsList.get(i);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(BakingContract.BakingEntry.RECIPE_STEP, recipe.name
+                        + "_" + Integer.toString(step.getStepID()));
+                contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
+                contentValues.put(BakingContract.BakingEntry.COLUMN_SHORT_DESCRIPTION, step.getShortDescription());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_DESCRIPTION, step.getDescription());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_VIDEO_URL, step.getVideoURL());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_THUMBNAIL_URL, step.getThumbnailURL());
+                contentValues.put(BakingContract.BakingEntry.COLUMN_STEP_ID, step.getStepID());
+                getContentResolver().insert(BakingContract.BakingEntry.STEPS_URI, contentValues);
             }
         }
     }
@@ -174,34 +232,4 @@ public class MainActivity extends AppCompatActivity{
             }
         }
     }
-
-//    @Override
-//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//        Log.d(TAG, "onCreateLoader: loader Created");
-//        switch(id) {
-//            case ID_RECIPE_LOADER:
-//                Uri recipeUri = BakingContract.BakingEntry.RECIPE_URI;
-//
-//                return new CursorLoader(this,
-//                        recipeUri,
-//                        RECIPE_PROJECTION,
-//                        null,
-//                        null,
-//                        null);
-//            default:
-//                throw new RuntimeException("Loader not implemeneted: " + id);
-//
-//        }
-//    }
-//
-//    @Override
-//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-//        mAdapter.setCursor(data);
-//        mAdapter.notifyDataSetChanged();
-//    }
-//
-//    @Override
-//    public void onLoaderReset(Loader<Cursor> loader) {
-//        mAdapter.setCursor(null);
-//    }
 }

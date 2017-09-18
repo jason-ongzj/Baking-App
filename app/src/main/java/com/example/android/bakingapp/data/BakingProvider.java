@@ -77,6 +77,27 @@ public class BakingProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case STEPS:
+                retCursor = db.query(BakingContract.BakingEntry.STEPS_TABLE,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case STEPS_WITH_RECIPE_NAME:
+                String recipeStep = uri.getPathSegments().get(1);
+                mSelection = "recipeStep=?";
+                mSelectionArgs = new String[]{recipeStep};
+                retCursor = db.query(BakingContract.BakingEntry.STEPS_TABLE,
+                        projection,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

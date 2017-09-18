@@ -1,14 +1,8 @@
 package com.example.android.bakingapp.ui;
 
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +15,8 @@ import com.example.android.bakingapp.data.BakingContract;
  * Created by Ben on 9/16/2017.
  */
 
-public class RecipeListFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>{
+public class RecipeListFragment extends Fragment{ //implements
+//        LoaderManager.LoaderCallbacks<Cursor>{
     public static final String TAG = "RecipeListFragment";
 
     private static final int ID_RECIPE_LOADER = 123;
@@ -51,37 +45,37 @@ public class RecipeListFragment extends Fragment implements
         mAdapter.setInflater(inflater);
         listView.setAdapter(mAdapter);
 
-        getActivity().getSupportLoaderManager().initLoader(ID_RECIPE_LOADER, null, this);
+//        getActivity().getSupportLoaderManager().initLoader(ID_RECIPE_LOADER, null, this);
 
         return rootView;
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch(id) {
-            case ID_RECIPE_LOADER:
-                Uri recipeUri = BakingContract.BakingEntry.RECIPE_URI;
-
-                return new CursorLoader(getActivity(),
-                        recipeUri,
-                        RECIPE_PROJECTION,
-                        null,
-                        null,
-                        null);
-            default:
-                throw new RuntimeException("Loader not implemeneted: " + id);
-
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.setCursor(data);
-        Log.d(TAG, "onLoadFinished: RecipeListAdapter cursor" + mAdapter.getCursor().getCount());
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.setCursor(null);
-    }
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        switch(id) {
+//            case ID_RECIPE_LOADER:
+//                Uri recipeUri = BakingContract.BakingEntry.RECIPE_URI;
+//
+//                return new CursorLoader(getActivity(),
+//                        recipeUri,
+//                        RECIPE_PROJECTION,
+//                        null,
+//                        null,
+//                        null);
+//            default:
+//                throw new RuntimeException("Loader not implemeneted: " + id);
+//
+//        }
+//    }
+//
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        mAdapter.setCursor(data);
+//        Log.d(TAG, "onLoadFinished: RecipeListAdapter cursor" + mAdapter.getCursor().getCount());
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//        mAdapter.setCursor(null);
+//    }
 }
