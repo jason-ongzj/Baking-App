@@ -59,29 +59,13 @@ public class RecipeListAdapter extends BaseAdapter {
         CardView cardView;
         mCursor.moveToPosition(position);
         if (convertView == null){
-//            textView = new TextView(mContext);
-//            textView.setText(mCursor.getString(RecipeListFragment.INDEX_RECIPE_NAME));
-//            textView.setTextSize(24);
-//            textView.setPadding(8, 8, 8, 8);
             View child = mInflater.inflate(R.layout.item_display, null);
             cardView = (CardView) child.findViewById(R.id.card_display);
             textView = (TextView) child.findViewById(R.id.card_display_text);
             textView.setText(mCursor.getString(RecipeListFragment.INDEX_RECIPE_NAME));
         } else {
-//            textView = (TextView) convertView;
             cardView = (CardView) convertView;
         }
         return cardView;
     }
-
-//    private String queryRecipe(int position){
-//        Cursor c = mContext.getContentResolver().query(
-//                BakingContract.BakingEntry.RECIPE_URI.buildUpon()
-//                .appendPath(Integer.toString(position)).build(),
-//                null,
-//                null,
-//                new String[] {Integer.toString(position)},
-//                null);
-////        c.getString()
-//    }
 }

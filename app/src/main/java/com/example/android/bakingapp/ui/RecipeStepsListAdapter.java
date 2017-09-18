@@ -1,6 +1,7 @@
 package com.example.android.bakingapp.ui;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ public class RecipeStepsListAdapter extends
         RecyclerView.Adapter<RecipeStepsListAdapter.RecipeStepAdapterViewHolder> {
 
     private Context mContext;
+    private Cursor mCursor;
 
     public RecipeStepsListAdapter(Context context){
         mContext = context;
@@ -52,6 +54,15 @@ public class RecipeStepsListAdapter extends
 
     @Override
     public int getItemCount() {
-        return 4;
+        if(null == mCursor) return 0;
+        return mCursor.getCount();
+    }
+
+    public void setCursor(Cursor cursor){
+        mCursor = cursor;
+    }
+
+    public Cursor getCursor(){
+        return mCursor;
     }
 }

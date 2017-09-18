@@ -51,7 +51,6 @@ public class RecipeListFragment extends Fragment implements
         mAdapter.setInflater(inflater);
         listView.setAdapter(mAdapter);
 
-
         getActivity().getSupportLoaderManager().initLoader(ID_RECIPE_LOADER, null, this);
 
         return rootView;
