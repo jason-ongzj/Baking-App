@@ -24,10 +24,6 @@
             android:authorities="com.example.android.bakingapp"
             android:exported="false" />
 
-        <activity
-            android:name=".RecipeStepsActivity"
-            android:label="@string/title_activity_recipe_steps"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

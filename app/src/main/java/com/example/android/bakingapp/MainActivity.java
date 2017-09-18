@@ -5,11 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.ListView;
 
 import com.example.android.bakingapp.data.BakingContract;
 import com.example.android.bakingapp.data.BakingDbHelper;
+import com.example.android.bakingapp.ui.RecipeListAdapter;
 import com.example.android.bakingapp.utils.BakingDbUtils;
 
 import org.json.JSONException;
@@ -21,24 +23,32 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.android.bakingapp.R.layout.recipes;
+
+public class MainActivity extends AppCompatActivity{
+    public static final String TAG = "MainActivity";
 
     private SQLiteDatabase mDb;
-    private RecyclerView mRecyclerView;
+    private RecipeListAdapter mAdapter;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(recipes);
 
         BakingDbHelper dbHelper = new BakingDbHelper(this);
-
         mDb = dbHelper.getWritableDatabase();
-
         new GetRecipesTask().execute();
+        mListView = (ListView) findViewById(R.id.recipe_list_view);
+        mAdapter = new RecipeListAdapter(MainActivity.this);
+
+        LayoutInflater inflater = getLayoutInflater();
+        mAdapter.setInflater(inflater);
+        mListView.setAdapter(mAdapter);
     }
 
-    private class GetRecipesTask extends AsyncTask<Void, Void, ArrayList<BakingRecipe>> {
+    private class GetRecipesTask extends AsyncTask<Void, Void, String> {
         private static final String TAG = "AsyncTask";
         public static final String REQUEST_METHOD = "GET";
         public static final int READ_TIMEOUT = 15000;
@@ -49,12 +59,11 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
         }
 
-        protected ArrayList<BakingRecipe> doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
             Log.d(TAG, "doInBackground: ");
 
             String urlString = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
             HttpURLConnection urlConnection = null;
-            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
 
             try {
                 URL url = new URL(urlString);
@@ -76,24 +85,8 @@ public class MainActivity extends AppCompatActivity {
                 bufferedReader.close();
                 streamReader.close();
 
-//                Log.d(TAG, stringBuilder.toString());
+                return stringBuilder.toString();
 
-                getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
-                getContentResolver().delete(BakingContract.BakingEntry.INGREDIENTS_URI, null, null);
-                getContentResolver().delete(BakingContract.BakingEntry.STEPS_URI, null, null);
-
-                try{
-                    recipesList = BakingDbUtils.getRecipesFromJSON(stringBuilder.toString());
-                    for (int i = 0; i < recipesList.size(); i++){
-                        BakingRecipe recipe = recipesList.get(i);
-                        addRecipesToDb(recipe);
-                        addIngredientsToDb(recipe);
-                        addStepsToDb(recipe);
-                    }
-                } catch (JSONException e){
-                    e.printStackTrace();
-                }
-                return recipesList;
 
             } catch(IOException e) {
                 e.printStackTrace();
@@ -106,8 +99,38 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        protected void onPostExecute(ArrayList<BakingRecipe> recipes) {
+        protected void onPostExecute(String response) {
+            try{
+                mAdapter.setRecipes(BakingDbUtils.getRecipeNamesFromJSON(response));
+                new AddDataToDb().execute(response);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    }
 
+    private class AddDataToDb extends AsyncTask<String, Void, Void>{
+        @Override
+        protected Void doInBackground(String... response) {
+            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
+
+            getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
+            getContentResolver().delete(BakingContract.BakingEntry.INGREDIENTS_URI, null, null);
+            getContentResolver().delete(BakingContract.BakingEntry.STEPS_URI, null, null);
+
+            try{
+                recipesList = BakingDbUtils.getRecipesFromJSON(response[0]);
+
+                for (int i = 0; i < recipesList.size(); i++){
+                    BakingRecipe recipe = recipesList.get(i);
+                    addRecipesToDb(recipe);
+                    addIngredientsToDb(recipe);
+                    addStepsToDb(recipe);
+                }
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+            return null;
         }
 
         private void addRecipesToDb(BakingRecipe recipe){
@@ -125,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 Ingredients ingredient = ingredientsList.get(i);
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(BakingContract.BakingEntry.RECIPE_INGREDIENT, recipe.name
-                                + "_" + ingredient.getIngredient());
+                        + "_" + ingredient.getIngredient());
                 contentValues.put(BakingContract.BakingEntry.COLUMN_RECIPE_NAME, recipe.name);
                 contentValues.put(BakingContract.BakingEntry.COLUMN_INGREDIENTS, ingredient.getIngredient());
                 contentValues.put(BakingContract.BakingEntry.COLUMN_QUANTITY, ingredient.getQuantity());
@@ -151,4 +174,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        Log.d(TAG, "onCreateLoader: loader Created");
+//        switch(id) {
+//            case ID_RECIPE_LOADER:
+//                Uri recipeUri = BakingContract.BakingEntry.RECIPE_URI;
+//
+//                return new CursorLoader(this,
+//                        recipeUri,
+//                        RECIPE_PROJECTION,
+//                        null,
+//                        null,
+//                        null);
+//            default:
+//                throw new RuntimeException("Loader not implemeneted: " + id);
+//
+//        }
+//    }
+//
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        mAdapter.setCursor(data);
+//        mAdapter.notifyDataSetChanged();
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//        mAdapter.setCursor(null);
+//    }
 }

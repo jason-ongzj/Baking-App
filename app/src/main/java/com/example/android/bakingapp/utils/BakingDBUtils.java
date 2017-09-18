@@ -32,18 +32,20 @@ public class BakingDbUtils {
             getIngredientsFromJSON(ingredientsJSON, recipe);
             getStepsFromJSON(stepsJSON, recipe);
             Log.d(TAG, recipe.image.toString());
-//            Log.d(TAG, ingredientsJSON);
-//            Log.d(TAG, recipe.ingredientsList.get(1).getQuantity());
-//            Log.d(TAG, recipe.ingredientsList.get(1).getIngredient());
-//            Log.d(TAG, recipe.ingredientsList.get(1).getMeasure());
-//            Log.d(TAG, recipe.stepsList.get(1).getDescription());
-//            Log.d(TAG, recipe.stepsList.get(1).getShortDescription());
-//            Log.d(TAG, Integer.toString(recipe.stepsList.get(1).getStepID()));
-//            Log.d(TAG, recipe.stepsList.get(1).getVideoURL());
-//            Log.d(TAG, recipe.stepsList.get(1).getThumbnailURL());
             bakingRecipes.add(i, recipe);
         }
         return bakingRecipes;
+    }
+
+    public static ArrayList<String> getRecipeNamesFromJSON(String response) throws JSONException{
+        JSONArray jsonArray = new JSONArray(response);
+        ArrayList<String> recipeNames = new ArrayList<String>();
+        for(int i = 0; i < jsonArray.length(); i++){
+            JSONObject recipeJSON = jsonArray.getJSONObject(i);
+            recipeNames.add(i, recipeJSON.getString("name"));
+            Log.d(TAG, "getRecipeNamesFromJSON: " + recipeNames.get(i));
+        }
+        return recipeNames;
     }
 
     public static void getIngredientsFromJSON(String response, BakingRecipe recipe) throws JSONException{
