@@ -6,4 +6,7 @@
     <string name="title_recipestep_detail">RecipeStep Detail</string>
     <string name="title_activity_recipe_steps">RecipeStepsActivity</string>
     <string name="title_activity_recipe_display">RecipeDisplayActivity</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="title_activity_recipe_instruction">RecipeInstructionActivity</string>
 </resources>

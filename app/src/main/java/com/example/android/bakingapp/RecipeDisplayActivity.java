@@ -20,7 +20,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
     private Fragment recipeDisplayFragment;
     private static final int ID_RECIPE_STEPS_LOADER = 156;
 
-    private static final String[] RECIPE_STEPS_PROJECTION = {
+    public static final String[] RECIPE_STEPS_PROJECTION = {
             BakingContract.BakingEntry.RECIPE_STEP,
             BakingContract.BakingEntry.COLUMN_RECIPE_NAME,
             BakingContract.BakingEntry.COLUMN_SHORT_DESCRIPTION,
@@ -30,14 +30,23 @@ public class RecipeDisplayActivity extends AppCompatActivity
             BakingContract.BakingEntry.COLUMN_STEP_ID
     };
 
+    public static final int INDEX_RECIPE_STEP = 0;
+    public static final int INDEX_RECIPE_NAME = 1;
+    public static final int INDEX_SHORT_DESCRIPTION = 2;
+    public static final int INDEX_DESCRIPTION = 3;
+    public static final int INDEX_VIDEO_URL = 4;
+    public static final int INDEX_THUMBNAIL_URL = 5;
+    public static final int INDEX_STEP_ID = 6;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recipe_information_display);
+        setContentView(R.layout.activity_recipe_display);
         recipeName = getIntent().getExtras().getString("recipe");
         Log.d(TAG, "onCreate: " + recipeName);
-        recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_steps);
+        recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
+        // Implement 2-pane mode
     }
 
     @Override
@@ -66,13 +75,15 @@ public class RecipeDisplayActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
             ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(data);
+            ((RecipeStepsListFragment) recipeDisplayFragment).setRecipe(recipeName);
+            Log.d(TAG, "onLoadFinished: " + recipeName);
         }
-//        Log.d(TAG, "onLoadFinished: RecipeListAdapter cursor" + mAdapter.getCursor().getCount());
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if (recipeDisplayFragment instanceof RecipeStepsListFragment)
+        if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
             ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(null);
+        }
     }
 }

@@ -2,7 +2,6 @@ package com.example.android.bakingapp.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.RecipeDisplayActivity;
 
 /**
  * Created by Ben on 9/16/2017.
@@ -22,21 +22,60 @@ public class RecipeStepsListAdapter extends
     public static final String TAG = "RecipeStepsListAdapter";
     private Context mContext;
     private Cursor mCursor;
+    private String mRecipe;
 
-    public RecipeStepsListAdapter(Context context){
+    final private RecipeInstructionOnClickHandler mClickHandler;
+
+    public interface RecipeInstructionOnClickHandler{
+        void onInstructionsClicked(String description, String uriString,
+                                   String thumbnailUri, int position);
+    }
+
+    public RecipeStepsListAdapter(RecipeInstructionOnClickHandler clickHandler){
+        mClickHandler = clickHandler;
+    }
+
+    public void setContext(Context context){
         mContext = context;
     }
 
-    public class RecipeStepAdapterViewHolder extends RecyclerView.ViewHolder
-            {
+    public void setRecipe(String recipe){
+        mRecipe = recipe;
+    }
 
-        public final CardView mCardDisplay;
-        public final TextView mRecipeName;
+    public String getRecipe(){
+        return mRecipe;
+    }
+
+    public class RecipeStepAdapterViewHolder extends RecyclerView.ViewHolder
+        implements View.OnClickListener{
+
+        private final TextView mRecipeStep;
+        private String mUriString;
+        private String mDescription;
+        private String mThumbnailUri;
 
         public RecipeStepAdapterViewHolder(View view){
             super(view);
-            mCardDisplay = (CardView) view.findViewById(R.id.card_display);
-            mRecipeName = (TextView) view.findViewById(R.id.card_display_text);
+            mRecipeStep = (TextView) view.findViewById(R.id.card_display_text);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            returnDataFromDb();
+            Log.d(TAG, "mDescription: " + mDescription);
+            Log.d(TAG, "mUriString: " + mUriString);
+            Log.d(TAG, "mThumbnailUri" + mThumbnailUri);
+            mClickHandler.onInstructionsClicked(mDescription, mUriString,
+                    mThumbnailUri, getAdapterPosition());
+        }
+
+        private void returnDataFromDb(){
+            mCursor.moveToPosition(getAdapterPosition());
+            mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
+            mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
+            mThumbnailUri = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
         }
     }
 
@@ -51,7 +90,8 @@ public class RecipeStepsListAdapter extends
 
     @Override
     public void onBindViewHolder(RecipeStepAdapterViewHolder holder, int position) {
-        holder.mRecipeName.setText("Hello World " + Integer.toString(position));
+        mCursor.moveToPosition(position);
+        holder.mRecipeStep.setText(mCursor.getString(RecipeDisplayActivity.INDEX_SHORT_DESCRIPTION));
     }
 
     @Override
@@ -67,7 +107,10 @@ public class RecipeStepsListAdapter extends
         Log.d(TAG, "setCursor: " + cursor.getCount());
     }
 
-    public Cursor getCursor(){
-        return mCursor;
+    public void closeCursor(){
+        if(mCursor == null)
+            Log.d(TAG, "closeCursor: Cursor closed");
+        else Log.d(TAG, "closeCursor: Cursor still open");
     }
+
 }

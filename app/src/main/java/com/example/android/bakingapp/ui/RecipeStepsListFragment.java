@@ -1,6 +1,7 @@
 package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,12 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.RecipeInstructionActivity;
 
-/**
- * Created by Ben on 9/17/2017.
- */
+public class RecipeStepsListFragment extends Fragment implements
+    RecipeStepsListAdapter.RecipeInstructionOnClickHandler{
 
-public class RecipeStepsListFragment extends Fragment {
+    public static final String TAG = "RecipeStepsListFragment";
 
     private RecipeStepsListAdapter mAdapter;
 
@@ -32,13 +33,29 @@ public class RecipeStepsListFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new RecipeStepsListAdapter(getActivity());
+        mAdapter = new RecipeStepsListAdapter(this);
+        mAdapter.setContext(getActivity());
         recyclerView.setAdapter(mAdapter);
 
         return rootView;
     }
 
+    @Override
+    public void onInstructionsClicked(String description, String uriString,
+                                      String thumbnailUri, int position) {
+        Intent intent = new Intent(getActivity(), RecipeInstructionActivity.class);
+        intent.putExtra("InstructionSet", new String[] {description, uriString, thumbnailUri});
+        intent.putExtra("ItemCount", mAdapter.getItemCount());
+        intent.putExtra("ItemPosition", position);
+        intent.putExtra("RecipeName", mAdapter.getRecipe());
+        startActivity(intent);
+        mAdapter.closeCursor();
+//        Log.d(TAG, "onInstructionsClicked: " + Integer.toString(mAdapter.getItemCount()));
+    }
+
     public void setAdapterCursor(Cursor cursor){
         mAdapter.setCursor(cursor);
     }
+
+    public void setRecipe(String recipe) {mAdapter.setRecipe(recipe);}
 }

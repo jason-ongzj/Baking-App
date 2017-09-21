@@ -2,9 +2,7 @@ package com.example.android.bakingapp.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,34 +14,19 @@ import com.example.android.bakingapp.RecipeDisplayActivity;
 
 import java.util.ArrayList;
 
-import static com.example.android.bakingapp.MainActivity.TAG;
-
-/**
- * Created by Ben on 9/17/2017.
- */
-
 public class RecipeListAdapter extends BaseAdapter {
 
     private Context mContext;
-    private Cursor mCursor;
     private ArrayList<String> mRecipes;
     private LayoutInflater mInflater;
     public void setRecipes(ArrayList<String> recipes){
         mRecipes = recipes;
         notifyDataSetChanged();
-        Log.d(TAG, "setRecipes: " + mRecipes.get(3));
+//        Log.d(TAG, "setRecipes: " + mRecipes.get(3));
     }
 
     public RecipeListAdapter(Context context){
         mContext = context;
-    }
-
-    public void setCursor(Cursor cursor){
-        mCursor = cursor;
-    }
-
-    public Cursor getCursor(){
-        return mCursor;
     }
 
     public void setInflater(LayoutInflater inflater){
@@ -85,7 +68,6 @@ public class RecipeListAdapter extends BaseAdapter {
                 mContext.startActivity(intent);
             }
         });
-
         return cardView;
     }
 }
