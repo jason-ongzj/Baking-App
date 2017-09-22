@@ -6,7 +6,7 @@
     <fragment
         android:id="@+id/fragment_recipe_display"
         android:name="com.example.android.bakingapp.ui.RecipeStepsListFragment"
-        android:layout_width="400dp"
+        android:layout_width="300dp"
         android:layout_height="match_parent"></fragment>
 
     <FrameLayout

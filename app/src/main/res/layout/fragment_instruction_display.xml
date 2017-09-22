@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:keepScreenOn="true">
 
     <TextView
         android:id="@+id/StepDescription"
@@ -17,6 +19,7 @@
         android:layout_marginStart="24dp"
         android:text="TextView"
         android:textSize="18sp"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/Previous"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

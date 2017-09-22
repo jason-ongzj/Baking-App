@@ -1,6 +1,7 @@
 package com.example.android.bakingapp;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,13 +12,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.android.bakingapp.data.BakingContract;
+import com.example.android.bakingapp.ui.RecipeInstructionFragment;
 import com.example.android.bakingapp.ui.RecipeStepsListFragment;
 
 public class RecipeDisplayActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>{
     public static final String TAG = "RecipeDisplayActivity";
+    public static boolean mTwoPane;
     private String recipeName;
     private Fragment recipeDisplayFragment;
+    private RecipeInstructionFragment recipeInstructionFragment;
     private static final int ID_RECIPE_STEPS_LOADER = 156;
 
     public static final String[] RECIPE_STEPS_PROJECTION = {
@@ -43,10 +47,25 @@ public class RecipeDisplayActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_display);
         recipeName = getIntent().getExtras().getString("recipe");
+
+        // Implement 2-pane mode
+        if (findViewById(R.id.recipe_info_container) != null){
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                FragmentManager fragmentManager = getFragmentManager();
+
+                recipeInstructionFragment = new RecipeInstructionFragment();
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.recipe_info_container, recipeInstructionFragment)
+                        .commit();
+            }
+        } else mTwoPane = false;
+
         Log.d(TAG, "onCreate: " + recipeName);
         recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
-        // Implement 2-pane mode
+
     }
 
     @Override
@@ -78,6 +97,9 @@ public class RecipeDisplayActivity extends AppCompatActivity
             ((RecipeStepsListFragment) recipeDisplayFragment).setRecipe(recipeName);
             Log.d(TAG, "onLoadFinished: " + recipeName);
         }
+        if (recipeInstructionFragment != null){
+            recipeInstructionFragment.setCursor(data);
+        }
     }
 
     @Override
@@ -85,5 +107,18 @@ public class RecipeDisplayActivity extends AppCompatActivity
         if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
             ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(null);
         }
+        if (recipeInstructionFragment != null){
+            recipeInstructionFragment.destroyCursor();
+        }
     }
+
+    public void updateViews(){
+        if (recipeInstructionFragment != null){
+            // Call method from recipeInstructionFragment to update view
+        }
+    }
+
+//    public boolean isTwoPane(){
+//        return mTwoPane;
+//    }
 }

@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.RecipeDisplayActivity;
 import com.example.android.bakingapp.RecipeInstructionActivity;
 
 public class RecipeStepsListFragment extends Fragment implements
@@ -43,13 +44,17 @@ public class RecipeStepsListFragment extends Fragment implements
     @Override
     public void onInstructionsClicked(String description, String uriString,
                                       String thumbnailUri, int position) {
-        Intent intent = new Intent(getActivity(), RecipeInstructionActivity.class);
-        intent.putExtra("InstructionSet", new String[] {description, uriString, thumbnailUri});
-        intent.putExtra("ItemCount", mAdapter.getItemCount());
-        intent.putExtra("ItemPosition", position);
-        intent.putExtra("RecipeName", mAdapter.getRecipe());
-        startActivity(intent);
-        mAdapter.closeCursor();
+        if (!RecipeDisplayActivity.mTwoPane) {
+            Intent intent = new Intent(getActivity(), RecipeInstructionActivity.class);
+            intent.putExtra("InstructionSet", new String[]{description, uriString, thumbnailUri});
+            intent.putExtra("ItemCount", mAdapter.getItemCount());
+            intent.putExtra("ItemPosition", position);
+            intent.putExtra("RecipeName", mAdapter.getRecipe());
+            startActivity(intent);
+            mAdapter.closeCursor();
+        } else {
+            Bundle bundle = new Bundle();
+        }
 //        Log.d(TAG, "onInstructionsClicked: " + Integer.toString(mAdapter.getItemCount()));
     }
 
