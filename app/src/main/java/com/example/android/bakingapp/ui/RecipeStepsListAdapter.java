@@ -112,5 +112,4 @@ public class RecipeStepsListAdapter extends
             Log.d(TAG, "closeCursor: Cursor closed");
         else Log.d(TAG, "closeCursor: Cursor still open");
     }
-
 }

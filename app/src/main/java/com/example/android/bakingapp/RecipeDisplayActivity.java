@@ -12,17 +12,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.android.bakingapp.data.BakingContract;
+import com.example.android.bakingapp.ui.DataCommunications;
 import com.example.android.bakingapp.ui.RecipeInstructionFragment;
 import com.example.android.bakingapp.ui.RecipeStepsListFragment;
 
 public class RecipeDisplayActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Cursor>{
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        DataCommunications{
     public static final String TAG = "RecipeDisplayActivity";
-    public static boolean mTwoPane;
+    private static final int ID_RECIPE_STEPS_LOADER = 156;
+
+    private boolean mTwoPane;
     private String recipeName;
     private Fragment recipeDisplayFragment;
     private RecipeInstructionFragment recipeInstructionFragment;
-    private static final int ID_RECIPE_STEPS_LOADER = 156;
+
+    private String[] mRecipeData;
+    private int[] mAdapterData;
 
     public static final String[] RECIPE_STEPS_PROJECTION = {
             BakingContract.BakingEntry.RECIPE_STEP,
@@ -47,10 +53,12 @@ public class RecipeDisplayActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_display);
         recipeName = getIntent().getExtras().getString("recipe");
+        recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
 
         // Implement 2-pane mode
         if (findViewById(R.id.recipe_info_container) != null){
-            mTwoPane = true;
+//            mTwoPane = true;
+            ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(true);
             if (savedInstanceState == null) {
                 FragmentManager fragmentManager = getFragmentManager();
 
@@ -60,10 +68,13 @@ public class RecipeDisplayActivity extends AppCompatActivity
                         .add(R.id.recipe_info_container, recipeInstructionFragment)
                         .commit();
             }
-        } else mTwoPane = false;
+        } else {
+//            mTwoPane = false;
+            ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(false);
+        }
 
         Log.d(TAG, "onCreate: " + recipeName);
-        recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
+
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
 
     }
@@ -112,13 +123,29 @@ public class RecipeDisplayActivity extends AppCompatActivity
         }
     }
 
-    public void updateViews(){
-        if (recipeInstructionFragment != null){
-            // Call method from recipeInstructionFragment to update view
-        }
+    @Override
+    public String[] getStringData() {
+        return mRecipeData;
     }
 
-//    public boolean isTwoPane(){
-//        return mTwoPane;
-//    }
+    @Override
+    public void setStringData(String description, String videoURL, String thumbnailURL) {
+        mRecipeData = new String[] {description, videoURL, thumbnailURL};
+    }
+
+    @Override
+    public int[] getAdapterData() {
+        return mAdapterData;
+    }
+
+    @Override
+    public void setAdapterData(int position, int adapterCount) {
+        mAdapterData = new int[]{position, adapterCount};
+    }
+
+    // Only applicable in a 2-pane mode
+    @Override
+    public RecipeInstructionFragment getInstructionFragment() {
+        return recipeInstructionFragment;
+    }
 }

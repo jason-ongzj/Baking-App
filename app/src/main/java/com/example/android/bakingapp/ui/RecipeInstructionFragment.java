@@ -1,6 +1,7 @@
 package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -62,16 +63,21 @@ public class RecipeInstructionFragment extends Fragment
     private MediaSource mMediaSource;
     private boolean mTwoPane;
 
+    DataCommunications mCallback;
+
     public RecipeInstructionFragment(){
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(getActivity().getClass() == RecipeInstructionActivity.class)
-            mTwoPane = false;
-        else mTwoPane = true;
-        Log.d(TAG, "onActivityCreated: " + mTwoPane);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try{
+            mCallback = (DataCommunications) context;
+        } catch (ClassCastException e){
+            throw new ClassCastException(context.toString()
+                    + " must implement DataCommunication");
+        }
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -79,8 +85,12 @@ public class RecipeInstructionFragment extends Fragment
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.Media);
         mDescriptionTextView = (TextView) rootView.findViewById(R.id.StepDescription);
 
-        // Get info from onClickHandler
-        if(mTwoPane == false) {
+        if(getActivity().getClass() == RecipeInstructionActivity.class)
+            mTwoPane = false;
+        else mTwoPane = true;
+
+//         Get info from onClickHandler
+        if(!mTwoPane) {
             rootView.setVisibility(View.VISIBLE);
             Bundle bundle = getActivity().getIntent().getExtras();
             if (bundle != null) {
@@ -93,8 +103,6 @@ public class RecipeInstructionFragment extends Fragment
                 Log.d(TAG, "onCreateView: " + Integer.toString(position));
             }
 
-            // Check if this is landscape or portrait mode. Buttons and textView
-            // are absent in landscape mode.
             if (savedInstanceState != null) {
                 position = savedInstanceState.getInt("AdapterPosition");
                 mDescription = savedInstanceState.getString("Description");
@@ -106,6 +114,9 @@ public class RecipeInstructionFragment extends Fragment
                 initializePlayer(position);
             }
             mExoPlayer.setPlayWhenReady(true);
+
+            // Check if this is landscape or portrait mode. Buttons and textView
+            // are absent in landscape mode.
             checkPortraitOrLandscape(rootView);
         } else {
             rootView.setVisibility(View.INVISIBLE);
@@ -166,6 +177,17 @@ public class RecipeInstructionFragment extends Fragment
     public void setCursor(Cursor cursor){
         mCursor = cursor;
         mCursor.moveToPosition(position);
+    }
+
+    public void updateFragmentViews(){
+        String[] recipeData = mCallback.getStringData();
+        int[] adapterData = mCallback.getAdapterData();
+        mDescription = recipeData[0];
+        mUriString = recipeData[1];
+        mThumbnailUri = recipeData[2];
+        position = adapterData[0];
+        itemCount = adapterData[1];
+        Log.d(TAG, "updateFragmentViews: " + mDescription);
     }
 
     @Override
