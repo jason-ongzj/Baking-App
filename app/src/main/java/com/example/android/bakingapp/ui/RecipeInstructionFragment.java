@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeDisplayActivity;
-import com.example.android.bakingapp.RecipeInstructionActivity;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -52,6 +51,7 @@ public class RecipeInstructionFragment extends Fragment
     private int itemCount;
     private Cursor mCursor;
     private TextView mDescriptionTextView;
+    private View rootView;
 
     private SimpleExoPlayerView mPlayerView;
     private SimpleExoPlayer mExoPlayer;
@@ -65,62 +65,69 @@ public class RecipeInstructionFragment extends Fragment
 
     DataCommunications mCallback;
 
-    public RecipeInstructionFragment(){
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        // Only applies for 2-pane mode
+        if (getActivity() instanceof RecipeDisplayActivity){
+            if(((RecipeDisplayActivity) getActivity()).isTwoPane()) {
+                mTwoPane = ((RecipeDisplayActivity) getActivity()).isTwoPane();
+                try {
+                    mCallback = (DataCommunications) context;
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(context.toString()
+                            + " must implement DataCommunication");
+                }
+            }
+        }
+        Log.d(TAG, "onAttach: attached?");
+    }
 
-        try{
-            mCallback = (DataCommunications) context;
-        } catch (ClassCastException e){
-            throw new ClassCastException(context.toString()
-                    + " must implement DataCommunication");
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            rootView.setVisibility(View.VISIBLE);
+            position = savedInstanceState.getInt("AdapterPosition");
+            mDescription = savedInstanceState.getString("Description");
+            mUriString = savedInstanceState.getString("VideoURL");
+            mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
+            mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
+
+            Log.d(TAG, "position: " + position);
+            Log.d(TAG, "onActivityCreated: " + mDescription);
+            checkPortraitOrLandscape(rootView);
+            initializePlayer(position);
+            mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
+            mExoPlayer.setPlayWhenReady(true);
+        } else {
+            if (!mTwoPane) {
+                rootView.setVisibility(View.VISIBLE);
+                Bundle bundle = getActivity().getIntent().getExtras();
+                if (bundle != null) {
+                    String[] intentString = bundle.getStringArray("InstructionSet");
+                    position = bundle.getInt("ItemPosition");
+                    itemCount = bundle.getInt("ItemCount");
+                    mDescription = intentString[0];
+                    mUriString = intentString[1];
+                    mThumbnailUri = intentString[2];
+                    Log.d(TAG, "onCreateView: " + Integer.toString(position));
+                }
+                // Check if this is landscape or portrait mode. Buttons and textView
+                // are absent in landscape mode.
+                checkPortraitOrLandscape(rootView);
+                initializePlayer(position);
+                mExoPlayer.setPlayWhenReady(true);
+            }
         }
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
+        rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.Media);
         mDescriptionTextView = (TextView) rootView.findViewById(R.id.StepDescription);
+        Log.d(TAG, "onCreateView: " + mTwoPane);
 
-        if(getActivity().getClass() == RecipeInstructionActivity.class)
-            mTwoPane = false;
-        else mTwoPane = true;
-
-//         Get info from onClickHandler
-        if(!mTwoPane) {
-            rootView.setVisibility(View.VISIBLE);
-            Bundle bundle = getActivity().getIntent().getExtras();
-            if (bundle != null) {
-                String[] intentString = bundle.getStringArray("InstructionSet");
-                position = bundle.getInt("ItemPosition");
-                itemCount = bundle.getInt("ItemCount");
-                mDescription = intentString[0];
-                mUriString = intentString[1];
-                mThumbnailUri = intentString[2];
-                Log.d(TAG, "onCreateView: " + Integer.toString(position));
-            }
-
-            if (savedInstanceState != null) {
-                position = savedInstanceState.getInt("AdapterPosition");
-                mDescription = savedInstanceState.getString("Description");
-                mUriString = savedInstanceState.getString("VideoURL");
-                mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
-                initializePlayer(position);
-                mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
-            } else {
-                initializePlayer(position);
-            }
-            mExoPlayer.setPlayWhenReady(true);
-
-            // Check if this is landscape or portrait mode. Buttons and textView
-            // are absent in landscape mode.
-            checkPortraitOrLandscape(rootView);
-        } else {
-            rootView.setVisibility(View.INVISIBLE);
-        }
         return rootView;
     }
 
@@ -130,10 +137,14 @@ public class RecipeInstructionFragment extends Fragment
         if (nextButton != null && previousButton != null) {
             if (position == 0) {
                 previousButton.setVisibility(View.INVISIBLE);
-            } else previousButton.setVisibility(View.VISIBLE);
-            if (position == itemCount) {
+                nextButton.setVisibility(View.VISIBLE);
+            } else if (position == itemCount - 1) {
                 nextButton.setVisibility(View.INVISIBLE);
-            } else nextButton.setVisibility(View.VISIBLE);
+                previousButton.setVisibility(View.VISIBLE);
+            } else {
+                nextButton.setVisibility(View.VISIBLE);
+                previousButton.setVisibility(View.VISIBLE);
+            }
 
             previousButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -141,8 +152,9 @@ public class RecipeInstructionFragment extends Fragment
                     if (position != 0) {
                         nextButton.setVisibility(View.VISIBLE);
                         mCursor.moveToPrevious();
-                        position--;
-                        mDescriptionTextView.setText(mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION));
+                        position = position - 1;
+                        mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
+                        mDescriptionTextView.setText(mDescription);
                         mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
                         releasePlayer();
                         initializePlayer(position);
@@ -158,8 +170,9 @@ public class RecipeInstructionFragment extends Fragment
                     if (position != itemCount - 1) {
                         previousButton.setVisibility(View.VISIBLE);
                         mCursor.moveToNext();
-                        position++;
-                        mDescriptionTextView.setText(mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION));
+                        position = position + 1;
+                        mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
+                        mDescriptionTextView.setText(mDescription);
                         mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
                         releasePlayer();
                         initializePlayer(position);
@@ -174,31 +187,39 @@ public class RecipeInstructionFragment extends Fragment
         }
     }
 
-    public void setCursor(Cursor cursor){
-        mCursor = cursor;
-        mCursor.moveToPosition(position);
-    }
-
     public void updateFragmentViews(){
         String[] recipeData = mCallback.getStringData();
         int[] adapterData = mCallback.getAdapterData();
+
         mDescription = recipeData[0];
         mUriString = recipeData[1];
         mThumbnailUri = recipeData[2];
         position = adapterData[0];
         itemCount = adapterData[1];
+
+        mDescriptionTextView.setText(mDescription);
+        rootView.setVisibility(View.VISIBLE);
+        releasePlayer();
+        initializePlayer(position);
+        mExoPlayer.setPlayWhenReady(true);
+
         Log.d(TAG, "updateFragmentViews: " + mDescription);
+    }
+
+    public void setCursor(Cursor cursor){
+        mCursor = cursor;
+        mCursor.moveToPosition(position);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong("SeekTime", mExoPlayer.getCurrentPosition());
-        outState.putInt("PlaybackState", mExoPlayer.getPlaybackState());
         outState.putInt("AdapterPosition", position);
         outState.putString("Description", mDescription);
         outState.putString("VideoURL", mUriString);
         outState.putString("ThumbnailURL", mThumbnailUri);
+        outState.putBoolean("TwoPaneMode", mTwoPane);
     }
 
     public void destroyCursor(){
@@ -224,7 +245,6 @@ public class RecipeInstructionFragment extends Fragment
                         getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
             }
             mExoPlayer.prepare(mMediaSource);
-//            mExoPlayer.setPlayWhenReady(true);
         }
     }
 
