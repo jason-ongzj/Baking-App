@@ -1,7 +1,6 @@
 package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -66,29 +65,13 @@ public class RecipeInstructionFragment extends Fragment
     DataCommunications mCallback;
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        // Only applies for 2-pane mode
-        if (getActivity() instanceof RecipeDisplayActivity){
-            if(((RecipeDisplayActivity) getActivity()).isTwoPane()) {
-                mTwoPane = ((RecipeDisplayActivity) getActivity()).isTwoPane();
-                try {
-                    mCallback = (DataCommunications) context;
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(context.toString()
-                            + " must implement DataCommunication");
-                }
-            }
-        }
-        Log.d(TAG, "onAttach: attached?");
-    }
-
-    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
+//            mCallback.setInstructionFragment(this);
             rootView.setVisibility(View.VISIBLE);
             position = savedInstanceState.getInt("AdapterPosition");
+            itemCount = savedInstanceState.getInt("ItemCount");
             mDescription = savedInstanceState.getString("Description");
             mUriString = savedInstanceState.getString("VideoURL");
             mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
@@ -126,6 +109,17 @@ public class RecipeInstructionFragment extends Fragment
         rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.Media);
         mDescriptionTextView = (TextView) rootView.findViewById(R.id.StepDescription);
+        if (getActivity() instanceof RecipeDisplayActivity){
+            if(((RecipeDisplayActivity) getActivity()).isTwoPane()) {
+                mTwoPane = ((RecipeDisplayActivity) getActivity()).isTwoPane();
+                try {
+                    mCallback = (DataCommunications) getActivity();
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(getActivity().toString()
+                            + " must implement DataCommunication");
+                }
+            }
+        }
         Log.d(TAG, "onCreateView: " + mTwoPane);
 
         return rootView;
@@ -214,8 +208,8 @@ public class RecipeInstructionFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong("SeekTime", mExoPlayer.getCurrentPosition());
         outState.putInt("AdapterPosition", position);
+        outState.putInt("ItemCount", itemCount);
         outState.putString("Description", mDescription);
         outState.putString("VideoURL", mUriString);
         outState.putString("ThumbnailURL", mThumbnailUri);

@@ -22,7 +22,6 @@ public class RecipeListAdapter extends BaseAdapter {
     public void setRecipes(ArrayList<String> recipes){
         mRecipes = recipes;
         notifyDataSetChanged();
-//        Log.d(TAG, "setRecipes: " + mRecipes.get(3));
     }
 
     public RecipeListAdapter(Context context){

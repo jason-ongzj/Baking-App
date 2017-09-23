@@ -68,16 +68,34 @@ public class RecipeDisplayActivity extends AppCompatActivity
                 fragmentManager.beginTransaction()
                         .add(R.id.recipe_info_container, recipeInstructionFragment)
                         .commit();
+            } else {
+
+                recipeInstructionFragment = (RecipeInstructionFragment) getFragmentManager().getFragment(
+                        savedInstanceState, "RecipeInstructionFragment");
+                mTwoPane = savedInstanceState.getBoolean("mTwoPane");
+                if (recipeInstructionFragment == null)
+                    Log.d(TAG, "onRestoreInstanceState: fragment not found" );
+                else Log.d(TAG, "onRestoreInstanceState: fragment found");
+                Log.d(TAG, "mTwoPane: " + mTwoPane);
             }
         } else {
             mTwoPane = false;
             ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(false);
         }
 
-        Log.d(TAG, "onCreate: " + recipeName);
+        Log.d(TAG, "onCreate: RecipeDisplayActivity");
 
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mTwoPane) {
+            getFragmentManager().putFragment(outState,
+                    "RecipeInstructionFragment", recipeInstructionFragment);
+            outState.putBoolean("mTwoPane", mTwoPane);
+        }
     }
 
     @Override
@@ -100,11 +118,6 @@ public class RecipeDisplayActivity extends AppCompatActivity
             }
         }
         else return null;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     @Override
