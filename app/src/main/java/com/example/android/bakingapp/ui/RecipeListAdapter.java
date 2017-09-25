@@ -14,7 +14,13 @@ import com.example.android.bakingapp.RecipeDisplayActivity;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class RecipeListAdapter extends BaseAdapter {
+
+    @BindView(R.id.card_display_text) TextView cardDisplayText;
+    @BindView(R.id.card_display) CardView cardView;
 
     private Context mContext;
     private ArrayList<String> mRecipes;
@@ -50,16 +56,14 @@ public class RecipeListAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        TextView textView;
-        CardView cardView;
         if (convertView == null) {
             View child = mInflater.inflate(R.layout.item_display, null);
-            cardView = (CardView) child.findViewById(R.id.card_display);
-            textView = (TextView) child.findViewById(R.id.card_display_text);
-            textView.setText(mRecipes.get(position));
+            ButterKnife.bind(this, child);
+            cardDisplayText.setText(mRecipes.get(position));
         } else {
             cardView = (CardView) convertView;
         }
+
         cardView.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 Intent intent = new Intent(mContext, RecipeDisplayActivity.class);

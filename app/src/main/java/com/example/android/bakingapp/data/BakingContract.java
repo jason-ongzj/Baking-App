@@ -3,10 +3,6 @@ package com.example.android.bakingapp.data;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by Ben on 9/14/2017.
- */
-
 public class BakingContract {
 
     public static final String CONTENT_AUTHORITY = "com.example.android.bakingapp";

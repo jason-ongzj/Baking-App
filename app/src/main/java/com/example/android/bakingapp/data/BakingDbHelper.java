@@ -4,10 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by Ben on 9/14/2017.
- */
-
 public class BakingDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "bakingRecipes.db";

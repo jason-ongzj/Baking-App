@@ -3,7 +3,6 @@ package com.example.android.bakingapp.ui;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +11,13 @@ import android.widget.TextView;
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeDisplayActivity;
 
-/**
- * Created by Ben on 9/16/2017.
- */
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class RecipeStepsListAdapter extends
         RecyclerView.Adapter<RecipeStepsListAdapter.RecipeStepAdapterViewHolder> {
 
-    public static final String TAG = "RecipeStepsListAdapter";
     private Context mContext;
     private Cursor mCursor;
     private String mRecipe;
@@ -50,23 +48,20 @@ public class RecipeStepsListAdapter extends
     public class RecipeStepAdapterViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener{
 
-        private final TextView mRecipeStep;
         private String mUriString;
         private String mDescription;
         private String mThumbnailUri;
 
+        @BindView(R.id.card_display_text) TextView mRecipeStep;
+
         public RecipeStepAdapterViewHolder(View view){
             super(view);
-            mRecipeStep = (TextView) view.findViewById(R.id.card_display_text);
-            view.setOnClickListener(this);
+            ButterKnife.bind(this, view);
         }
 
-        @Override
+        @OnClick(R.id.card_display_text)
         public void onClick(View v) {
             returnDataFromDb();
-            Log.d(TAG, "mDescription: " + mDescription);
-            Log.d(TAG, "mUriString: " + mUriString);
-            Log.d(TAG, "mThumbnailUri" + mThumbnailUri);
             mClickHandler.onInstructionsClicked(mDescription, mUriString,
                     mThumbnailUri, getAdapterPosition());
         }
@@ -81,10 +76,8 @@ public class RecipeStepsListAdapter extends
 
     @Override
     public RecipeStepAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int layoutIdForCardDisplayItem = R.layout.item_display;
         LayoutInflater inflater = LayoutInflater.from(mContext);
-
-        View view = inflater.inflate(layoutIdForCardDisplayItem, parent, false);
+        View view = inflater.inflate(R.layout.item_display, parent, false);
         return new RecipeStepAdapterViewHolder(view);
     }
 
@@ -103,13 +96,5 @@ public class RecipeStepsListAdapter extends
     public void setCursor(Cursor cursor){
         mCursor = cursor;
         notifyDataSetChanged();
-        if (mCursor != null)
-        Log.d(TAG, "setCursor: " + cursor.getCount());
-    }
-
-    public void closeCursor(){
-        if(mCursor == null)
-            Log.d(TAG, "closeCursor: Cursor closed");
-        else Log.d(TAG, "closeCursor: Cursor still open");
     }
 }

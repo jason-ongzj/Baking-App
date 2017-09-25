@@ -23,22 +23,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity{
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
+
+    @BindView(R.id.recipe_list_view) ListView mListView;
 
     private SQLiteDatabase mDb;
     private RecipeListAdapter mAdapter;
-    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipes);
+        ButterKnife.bind(this);
 
         BakingDbHelper dbHelper = new BakingDbHelper(this);
         mDb = dbHelper.getWritableDatabase();
         new GetRecipesTask().execute();
-        mListView = (ListView) findViewById(R.id.recipe_list_view);
+
         mAdapter = new RecipeListAdapter(MainActivity.this);
 
         LayoutInflater inflater = getLayoutInflater();
@@ -59,7 +65,6 @@ public class MainActivity extends AppCompatActivity{
 
         protected String doInBackground(Void... voids) {
             Log.d(TAG, "doInBackground: ");
-            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
             String urlString = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
             HttpURLConnection urlConnection = null;
 

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,18 +15,20 @@ import android.view.ViewGroup;
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeInstructionActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 public class RecipeStepsListFragment extends Fragment implements
     RecipeStepsListAdapter.RecipeInstructionOnClickHandler{
 
+    @Nullable
+    @BindView(R.id.recyclerView_recipeSteps) RecyclerView recyclerView;
+    private Unbinder unbinder;
+
     DataCommunications mCallback;
-
-    public static final String TAG = "RecipeStepsListFragment";
     private boolean mTwoPane;
-
     private RecipeStepsListAdapter mAdapter;
-
-    public RecipeStepsListFragment(){
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -45,7 +46,7 @@ public class RecipeStepsListFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_recipe_steps, container, false);
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView_recipeSteps);
+        unbinder = ButterKnife.bind(this, rootView);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -57,6 +58,12 @@ public class RecipeStepsListFragment extends Fragment implements
         return rootView;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
     public void isTwoPane(boolean twoPane){
         mTwoPane = twoPane;
     }
@@ -65,18 +72,20 @@ public class RecipeStepsListFragment extends Fragment implements
     public void onInstructionsClicked(String description, String uriString,
                                       String thumbnailUri, int position) {
         if (!mTwoPane) {
+
             Intent intent = new Intent(getActivity(), RecipeInstructionActivity.class);
             intent.putExtra("InstructionSet", new String[]{description, uriString, thumbnailUri});
             intent.putExtra("ItemCount", mAdapter.getItemCount());
             intent.putExtra("ItemPosition", position);
             intent.putExtra("RecipeName", mAdapter.getRecipe());
             startActivity(intent);
-            mAdapter.closeCursor();
-            Log.d(TAG, "onInstructionsClicked: 2 pane false");
+
         } else {
+
             mCallback.setStringData(description, uriString, thumbnailUri);
             mCallback.setAdapterData(position, mAdapter.getItemCount());
             mCallback.getInstructionFragment().updateFragmentViews();
+
         }
     }
 

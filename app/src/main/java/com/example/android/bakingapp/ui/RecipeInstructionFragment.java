@@ -5,8 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,25 +35,25 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-/**
- * Created by Ben on 9/21/2017.
- */
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class RecipeInstructionFragment extends Fragment
         implements ExoPlayer.EventListener{
 
     public static final String TAG = "RecipeInstruction";
 
+    @BindView(R.id.Media) SimpleExoPlayerView mPlayerView;
+    @BindView(R.id.StepDescription) TextView mDescriptionTextView;
+    private Unbinder unbinder;
+
     private int position;
     private int itemCount;
     private Cursor mCursor;
-    private TextView mDescriptionTextView;
     private View rootView;
 
-    private SimpleExoPlayerView mPlayerView;
     private SimpleExoPlayer mExoPlayer;
-    private PlaybackStateCompat.Builder mStateBuilder;
-    private MediaSessionCompat mMediaSession;
     private String mUriString;
     private String mDescription;
     private String mThumbnailUri;
@@ -68,7 +66,6 @@ public class RecipeInstructionFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-//            mCallback.setInstructionFragment(this);
             rootView.setVisibility(View.VISIBLE);
             position = savedInstanceState.getInt("AdapterPosition");
             itemCount = savedInstanceState.getInt("ItemCount");
@@ -77,8 +74,6 @@ public class RecipeInstructionFragment extends Fragment
             mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
             mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
 
-            Log.d(TAG, "position: " + position);
-            Log.d(TAG, "onActivityCreated: " + mDescription);
             checkPortraitOrLandscape(rootView);
             initializePlayer(position);
             mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
@@ -107,8 +102,9 @@ public class RecipeInstructionFragment extends Fragment
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
-        mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.Media);
-        mDescriptionTextView = (TextView) rootView.findViewById(R.id.StepDescription);
+
+        unbinder = ButterKnife.bind(this, rootView);
+
         if (getActivity() instanceof RecipeDisplayActivity){
             if(((RecipeDisplayActivity) getActivity()).isTwoPane()) {
                 mTwoPane = ((RecipeDisplayActivity) getActivity()).isTwoPane();
@@ -120,9 +116,13 @@ public class RecipeInstructionFragment extends Fragment
                 }
             }
         }
-        Log.d(TAG, "onCreateView: " + mTwoPane);
-
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     public void checkPortraitOrLandscape(View rootView){
@@ -196,8 +196,6 @@ public class RecipeInstructionFragment extends Fragment
         releasePlayer();
         initializePlayer(position);
         mExoPlayer.setPlayWhenReady(true);
-
-        Log.d(TAG, "updateFragmentViews: " + mDescription);
     }
 
     public void setCursor(Cursor cursor){
@@ -270,16 +268,13 @@ public class RecipeInstructionFragment extends Fragment
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
     }
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-
     }
 
     @Override
     public void onPositionDiscontinuity() {
-
     }
 }

@@ -2,10 +2,6 @@ package com.example.android.bakingapp;
 
 import java.util.ArrayList;
 
-/**
- * Created by Ben on 9/14/2017.
- */
-
 public class BakingRecipe {
 
     public String name;

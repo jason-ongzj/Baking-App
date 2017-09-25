@@ -19,38 +19,46 @@ public class BakingDbUtils {
     public static ArrayList<BakingRecipe> getRecipesFromJSON(String response) throws JSONException {
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<BakingRecipe> bakingRecipes = new ArrayList<BakingRecipe>();
+
         for(int i = 0; i < jsonArray.length(); i++){
+
             BakingRecipe recipe = new BakingRecipe();
             JSONObject recipeJSON = jsonArray.getJSONObject(i);
+
             recipe.id = recipeJSON.getInt("id");
             recipe.name = recipeJSON.getString("name");
             recipe.servings = recipeJSON.getInt("servings");
             recipe.image = recipeJSON.getString("image");
+
             String ingredientsJSON = recipeJSON.getString("ingredients");
             String stepsJSON = recipeJSON.getString("steps");
 
             getIngredientsFromJSON(ingredientsJSON, recipe);
             getStepsFromJSON(stepsJSON, recipe);
-            Log.d(TAG, recipe.image.toString());
+
             bakingRecipes.add(i, recipe);
+
         }
+
         return bakingRecipes;
     }
 
     public static ArrayList<String> getRecipeNamesFromJSON(String response) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<String> recipeNames = new ArrayList<String>();
+
         for(int i = 0; i < jsonArray.length(); i++){
             JSONObject recipeJSON = jsonArray.getJSONObject(i);
             recipeNames.add(i, recipeJSON.getString("name"));
-            Log.d(TAG, "getRecipeNamesFromJSON: " + recipeNames.get(i));
         }
+
         return recipeNames;
     }
 
     public static void getIngredientsFromJSON(String response, BakingRecipe recipe) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<Ingredients> ingredientsList = new ArrayList<Ingredients>();
+
         for(int i = 0; i < jsonArray.length(); i++){
             JSONObject ingredientJSON = jsonArray.getJSONObject(i);
 
@@ -60,12 +68,14 @@ public class BakingDbUtils {
 
             ingredientsList.add(i, new Ingredients(quantity, measure, ingredient));
         }
+
         recipe.ingredientsList = ingredientsList;
     }
 
     public static void getStepsFromJSON(String response, BakingRecipe recipe) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<RecipeSteps> stepsList = new ArrayList<RecipeSteps>();
+
         for(int i = 0; i < jsonArray.length(); i++){
             JSONObject stepJSON = jsonArray.getJSONObject(i);
             int stepId = stepJSON.getInt("id");
@@ -78,6 +88,7 @@ public class BakingDbUtils {
 
             stepsList.add(i, recipeStep);
         }
+
         recipe.stepsList = stepsList;
     }
 }

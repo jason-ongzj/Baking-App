@@ -5,21 +5,29 @@ import android.app.FragmentManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.widget.FrameLayout;
 
 import com.example.android.bakingapp.data.BakingContract;
 import com.example.android.bakingapp.ui.DataCommunications;
 import com.example.android.bakingapp.ui.RecipeInstructionFragment;
 import com.example.android.bakingapp.ui.RecipeStepsListFragment;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class RecipeDisplayActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>,
         DataCommunications{
     public static final String TAG = "RecipeDisplayActivity";
+
+    @Nullable
+    @BindView(R2.id.recipe_info_container) FrameLayout mRecipeInfoContainer;
+
     private static final int ID_RECIPE_STEPS_LOADER = 156;
 
     private boolean mTwoPane;
@@ -52,6 +60,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_display);
+        ButterKnife.bind(this);
 
         // Null condition for testing purposes
         if(getIntent().getExtras() == null){
@@ -63,11 +72,11 @@ public class RecipeDisplayActivity extends AppCompatActivity
         recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
 
         // Implement 2-pane mode
-        if (findViewById(R.id.recipe_info_container) != null){
+        if (mRecipeInfoContainer != null){
             mTwoPane = true;
-            Log.d(TAG, "onCreate: RecipeDisplayActivity");
             ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(true);
             if (savedInstanceState == null) {
+
                 FragmentManager fragmentManager = getFragmentManager();
 
                 recipeInstructionFragment = new RecipeInstructionFragment();
@@ -75,21 +84,18 @@ public class RecipeDisplayActivity extends AppCompatActivity
                 fragmentManager.beginTransaction()
                         .add(R.id.recipe_info_container, recipeInstructionFragment)
                         .commit();
+
             } else {
+
                 recipeInstructionFragment = (RecipeInstructionFragment) getFragmentManager().getFragment(
                         savedInstanceState, "RecipeInstructionFragment");
                 mTwoPane = savedInstanceState.getBoolean("mTwoPane");
-                if (recipeInstructionFragment == null)
-                    Log.d(TAG, "onRestoreInstanceState: fragment not found" );
-                else Log.d(TAG, "onRestoreInstanceState: fragment found");
-                Log.d(TAG, "mTwoPane: " + mTwoPane);
+
             }
         } else {
             mTwoPane = false;
             ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(false);
         }
-
-        Log.d(TAG, "onCreate: RecipeDisplayActivity");
 
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
     }
@@ -131,7 +137,6 @@ public class RecipeDisplayActivity extends AppCompatActivity
         if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
             ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(data);
             ((RecipeStepsListFragment) recipeDisplayFragment).setRecipe(recipeName);
-            Log.d(TAG, "onLoadFinished: " + recipeName);
         }
         if (recipeInstructionFragment != null){
             recipeInstructionFragment.setCursor(data);

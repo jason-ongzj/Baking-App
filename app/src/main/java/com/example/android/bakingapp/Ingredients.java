@@ -1,9 +1,5 @@
 package com.example.android.bakingapp;
 
-/**
- * Created by Ben on 9/14/2017.
- */
-
 public class Ingredients {
 
     private final String quantity;
