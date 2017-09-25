@@ -31,6 +31,7 @@ public class RecipeInstructionActivity extends AppCompatActivity
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_recipe_instruction);
         recipeInstructionFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_instruction);
+
         mRecipe = getIntent().getExtras().getString("RecipeName");
         Log.d(TAG, "onCreate: " + mRecipe);
         getSupportLoaderManager().restartLoader(ID_RECIPE_STEPS_LOADER, null, this);

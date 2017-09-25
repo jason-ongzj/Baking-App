@@ -130,6 +130,12 @@ public class MainActivity extends AppCompatActivity{
             return null;
         }
 
+        // Implement hide circular loader
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+
         private void addRecipesToDb(BakingRecipe recipe){
             ContentValues contentValues = new ContentValues();
             contentValues.put(BakingContract.BakingEntry._ID, recipe.id);

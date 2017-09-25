@@ -52,7 +52,14 @@ public class RecipeDisplayActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_display);
-        recipeName = getIntent().getExtras().getString("recipe");
+
+        // Null condition for testing purposes
+        if(getIntent().getExtras() == null){
+            recipeName = "Nutella Pie";
+        } else {
+            recipeName = getIntent().getExtras().getString("recipe");
+        }
+
         recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
 
         // Implement 2-pane mode
@@ -69,7 +76,6 @@ public class RecipeDisplayActivity extends AppCompatActivity
                         .add(R.id.recipe_info_container, recipeInstructionFragment)
                         .commit();
             } else {
-
                 recipeInstructionFragment = (RecipeInstructionFragment) getFragmentManager().getFragment(
                         savedInstanceState, "RecipeInstructionFragment");
                 mTwoPane = savedInstanceState.getBoolean("mTwoPane");
