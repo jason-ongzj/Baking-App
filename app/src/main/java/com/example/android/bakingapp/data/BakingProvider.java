@@ -98,6 +98,15 @@ public class BakingProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case INGREDIENTS:
+                retCursor = db.query(BakingContract.BakingEntry.INGREDIENTS_TABLE,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

@@ -138,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<BakingRecipe> recipesList) {
             super.onPostExecute(recipesList);
-//            recipesList.get(1).
+            // Number in id column of RECIPES_TABLE starts with 1
+//            GetIngredientsListService.retrieveIngredientsList(MainActivity.this, 1);
         }
 
         private void addRecipesToDb(BakingRecipe recipe){

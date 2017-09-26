@@ -43,7 +43,7 @@
                 android:resource="@xml/baking_app_widget_provider_info" />
         </receiver>
 
-        <service android:name=".GetIngredientsListService"/>
+        <service android:name=".GetIngredientListService"/>
     </application>
 
 </manifest>
