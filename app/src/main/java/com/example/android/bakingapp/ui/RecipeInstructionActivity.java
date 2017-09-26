@@ -1,4 +1,4 @@
-package com.example.android.bakingapp;
+package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
 import android.database.Cursor;
@@ -11,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.data.BakingContract;
+import com.example.android.bakingapp.ui.RecipeDisplayActivity;
 import com.example.android.bakingapp.ui.RecipeInstructionFragment;
 
 public class RecipeInstructionActivity extends AppCompatActivity

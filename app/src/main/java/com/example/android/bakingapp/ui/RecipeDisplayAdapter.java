@@ -9,14 +9,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
-import com.example.android.bakingapp.RecipeDisplayActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RecipeStepsListAdapter extends
-        RecyclerView.Adapter<RecipeStepsListAdapter.RecipeStepAdapterViewHolder> {
+public class RecipeDisplayAdapter extends
+        RecyclerView.Adapter<RecipeDisplayAdapter.RecipeDisplayAdapterViewHolder> {
 
     private Context mContext;
     private Cursor mCursor;
@@ -29,7 +28,7 @@ public class RecipeStepsListAdapter extends
                                    String thumbnailUri, int position);
     }
 
-    public RecipeStepsListAdapter(RecipeInstructionOnClickHandler clickHandler){
+    public RecipeDisplayAdapter(RecipeInstructionOnClickHandler clickHandler){
         mClickHandler = clickHandler;
     }
 
@@ -45,7 +44,7 @@ public class RecipeStepsListAdapter extends
         return mRecipe;
     }
 
-    public class RecipeStepAdapterViewHolder extends RecyclerView.ViewHolder
+    public class RecipeDisplayAdapterViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener{
 
         private String mUriString;
@@ -54,7 +53,7 @@ public class RecipeStepsListAdapter extends
 
         @BindView(R.id.card_display_text) TextView mRecipeStep;
 
-        public RecipeStepAdapterViewHolder(View view){
+        public RecipeDisplayAdapterViewHolder(View view){
             super(view);
             ButterKnife.bind(this, view);
         }
@@ -75,14 +74,14 @@ public class RecipeStepsListAdapter extends
     }
 
     @Override
-    public RecipeStepAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecipeDisplayAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(R.layout.item_display, parent, false);
-        return new RecipeStepAdapterViewHolder(view);
+        return new RecipeDisplayAdapterViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(RecipeStepAdapterViewHolder holder, int position) {
+    public void onBindViewHolder(RecipeDisplayAdapterViewHolder holder, int position) {
         mCursor.moveToPosition(position);
         holder.mRecipeStep.setText(mCursor.getString(RecipeDisplayActivity.INDEX_SHORT_DESCRIPTION));
     }

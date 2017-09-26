@@ -12,5 +12,4 @@ public class BakingRecipe {
     public String image;
 
     public BakingRecipe(){};
-
 }

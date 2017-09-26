@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
-import com.example.android.bakingapp.RecipeDisplayActivity;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -44,7 +43,9 @@ public class RecipeInstructionFragment extends Fragment
 
     public static final String TAG = "RecipeInstruction";
 
+    @Nullable
     @BindView(R.id.Media) SimpleExoPlayerView mPlayerView;
+    @Nullable
     @BindView(R.id.StepDescription) TextView mDescriptionTextView;
     private Unbinder unbinder;
 
@@ -102,7 +103,6 @@ public class RecipeInstructionFragment extends Fragment
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
-
         unbinder = ButterKnife.bind(this, rootView);
 
         if (getActivity() instanceof RecipeDisplayActivity){
@@ -206,6 +206,11 @@ public class RecipeInstructionFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+//        long seekTime = 0;
+        if(mExoPlayer != null){
+            outState.putLong("SeekTime", mExoPlayer.getCurrentPosition());
+        }
+
         outState.putInt("AdapterPosition", position);
         outState.putInt("ItemCount", itemCount);
         outState.putString("Description", mDescription);

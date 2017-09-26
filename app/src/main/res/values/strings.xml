@@ -9,4 +9,6 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="title_activity_recipe_instruction">RecipeInstructionActivity</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

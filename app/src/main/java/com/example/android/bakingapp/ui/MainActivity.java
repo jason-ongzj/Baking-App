@@ -1,7 +1,6 @@
-package com.example.android.bakingapp;
+package com.example.android.bakingapp.ui;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,9 +8,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ListView;
 
+import com.example.android.bakingapp.BakingRecipe;
+import com.example.android.bakingapp.Ingredients;
+import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.RecipeSteps;
 import com.example.android.bakingapp.data.BakingContract;
 import com.example.android.bakingapp.data.BakingDbHelper;
-import com.example.android.bakingapp.ui.RecipeListAdapter;
 import com.example.android.bakingapp.utils.BakingDbUtils;
 
 import org.json.JSONException;
@@ -23,16 +25,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String TAG = "MainActivity";
 
     @BindView(R.id.recipe_list_view) ListView mListView;
 
-    private SQLiteDatabase mDb;
     private RecipeListAdapter mAdapter;
 
     @Override
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         BakingDbHelper dbHelper = new BakingDbHelper(this);
-        mDb = dbHelper.getWritableDatabase();
+        dbHelper.getWritableDatabase();
         new GetRecipesTask().execute();
 
         mAdapter = new RecipeListAdapter(MainActivity.this);
@@ -111,9 +110,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class AddDataToDb extends AsyncTask<String, Void, Void>{
+    private class AddDataToDb extends AsyncTask<String, Void, ArrayList<BakingRecipe>>{
         @Override
-        protected Void doInBackground(String... response) {
+        protected ArrayList<BakingRecipe> doInBackground(String... response) {
             ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
 
             getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
@@ -137,8 +136,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Implement hide circular loader
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(ArrayList<BakingRecipe> recipesList) {
+            super.onPostExecute(recipesList);
+//            recipesList.get(1).
         }
 
         private void addRecipesToDb(BakingRecipe recipe){

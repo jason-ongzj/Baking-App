@@ -1,4 +1,4 @@
-package com.example.android.bakingapp;
+package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -12,10 +12,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.FrameLayout;
 
+import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.R2;
 import com.example.android.bakingapp.data.BakingContract;
-import com.example.android.bakingapp.ui.DataCommunications;
-import com.example.android.bakingapp.ui.RecipeInstructionFragment;
-import com.example.android.bakingapp.ui.RecipeStepsListFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,7 +73,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
         // Implement 2-pane mode
         if (mRecipeInfoContainer != null){
             mTwoPane = true;
-            ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(true);
+            ((RecipeDisplayFragment) recipeDisplayFragment).isTwoPane(true);
             if (savedInstanceState == null) {
 
                 FragmentManager fragmentManager = getFragmentManager();
@@ -94,7 +93,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
             }
         } else {
             mTwoPane = false;
-            ((RecipeStepsListFragment) recipeDisplayFragment).isTwoPane(false);
+            ((RecipeDisplayFragment) recipeDisplayFragment).isTwoPane(false);
         }
 
         getSupportLoaderManager().initLoader(ID_RECIPE_STEPS_LOADER, null, this);
@@ -134,9 +133,9 @@ public class RecipeDisplayActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
-            ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(data);
-            ((RecipeStepsListFragment) recipeDisplayFragment).setRecipe(recipeName);
+        if (recipeDisplayFragment instanceof RecipeDisplayFragment) {
+            ((RecipeDisplayFragment) recipeDisplayFragment).setAdapterCursor(data);
+            ((RecipeDisplayFragment) recipeDisplayFragment).setRecipe(recipeName);
         }
         if (recipeInstructionFragment != null){
             recipeInstructionFragment.setCursor(data);
@@ -149,8 +148,8 @@ public class RecipeDisplayActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if (recipeDisplayFragment instanceof RecipeStepsListFragment) {
-            ((RecipeStepsListFragment) recipeDisplayFragment).setAdapterCursor(null);
+        if (recipeDisplayFragment instanceof RecipeDisplayFragment) {
+            ((RecipeDisplayFragment) recipeDisplayFragment).setAdapterCursor(null);
         }
         if (recipeInstructionFragment != null){
             recipeInstructionFragment.destroyCursor();

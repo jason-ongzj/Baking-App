@@ -13,14 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakingapp.R;
-import com.example.android.bakingapp.RecipeInstructionActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class RecipeStepsListFragment extends Fragment implements
-    RecipeStepsListAdapter.RecipeInstructionOnClickHandler{
+public class RecipeDisplayFragment extends Fragment implements
+    RecipeDisplayAdapter.RecipeInstructionOnClickHandler{
 
     @Nullable
     @BindView(R.id.recyclerView_recipeSteps) RecyclerView recyclerView;
@@ -28,7 +27,7 @@ public class RecipeStepsListFragment extends Fragment implements
 
     DataCommunications mCallback;
     private boolean mTwoPane;
-    private RecipeStepsListAdapter mAdapter;
+    private RecipeDisplayAdapter mAdapter;
 
     @Override
     public void onAttach(Context context) {
@@ -51,7 +50,7 @@ public class RecipeStepsListFragment extends Fragment implements
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new RecipeStepsListAdapter(this);
+        mAdapter = new RecipeDisplayAdapter(this);
         mAdapter.setContext(getActivity());
         recyclerView.setAdapter(mAdapter);
 

@@ -1,7 +1,5 @@
 package com.example.android.bakingapp.utils;
 
-import android.util.Log;
-
 import com.example.android.bakingapp.BakingRecipe;
 import com.example.android.bakingapp.Ingredients;
 import com.example.android.bakingapp.RecipeSteps;
@@ -13,8 +11,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class BakingDbUtils {
-
-    public static final String TAG = "BakingDBUtils";
 
     public static ArrayList<BakingRecipe> getRecipesFromJSON(String response) throws JSONException {
         JSONArray jsonArray = new JSONArray(response);
