@@ -162,8 +162,8 @@ public class RecipeDisplayActivity extends AppCompatActivity
     }
 
     @Override
-    public void setStringData(String description, String videoURL, String thumbnailURL) {
-        mRecipeData = new String[] {description, videoURL, thumbnailURL};
+    public void setStringData(String description, String videoURL, String thumbnailURL, String recipe) {
+        mRecipeData = new String[] {description, videoURL, thumbnailURL, recipe};
     }
 
     @Override

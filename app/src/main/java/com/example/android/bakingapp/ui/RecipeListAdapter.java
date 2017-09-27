@@ -18,8 +18,8 @@ import butterknife.ButterKnife;
 
 public class RecipeListAdapter extends BaseAdapter {
 
-    @BindView(R.id.card_display_text) TextView cardDisplayText;
-    @BindView(R.id.card_display) CardView cardView;
+    @BindView(R.id.card_display_main_text) TextView cardDisplayText;
+    @BindView(R.id.card_display_main) CardView cardView;
 
     private Context mContext;
     private ArrayList<String> mRecipes;
@@ -56,7 +56,7 @@ public class RecipeListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            View child = mInflater.inflate(R.layout.item_display, null);
+            View child = mInflater.inflate(R.layout.item_display_main, null);
             ButterKnife.bind(this, child);
             cardDisplayText.setText(mRecipes.get(position));
         } else {

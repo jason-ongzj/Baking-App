@@ -81,7 +81,7 @@ public class RecipeDisplayFragment extends Fragment implements
 
         } else {
 
-            mCallback.setStringData(description, uriString, thumbnailUri);
+            mCallback.setStringData(description, uriString, thumbnailUri, mAdapter.getRecipe());
             mCallback.setAdapterData(position, mAdapter.getItemCount());
             mCallback.getInstructionFragment().updateFragmentViews();
 

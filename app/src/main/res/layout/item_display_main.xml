@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/card_display"
+    android:id="@+id/card_display_main"
     android:layout_width="match_parent"
-    android:layout_marginTop="1dp"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/card_display_text"
+        android:id="@+id/card_display_main_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
         android:layout_margin="8dp"
         android:gravity="center_horizontal"
-        android:padding="8dp"
-        android:shadowRadius="1"
-        android:textSize="16sp" />
+        android:padding="24dp"
+        android:shadowRadius="2"
+        android:textSize="24sp" />
 </android.support.v7.widget.CardView>

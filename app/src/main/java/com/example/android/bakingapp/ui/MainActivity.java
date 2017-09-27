@@ -3,9 +3,11 @@ package com.example.android.bakingapp.ui;
 import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import com.example.android.bakingapp.BakingRecipe;
@@ -30,14 +32,17 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
+    @Nullable
     @BindView(R.id.recipe_list_view) ListView mListView;
+    @Nullable
+    @BindView(R.id.recipe_grid_view) GridView mGridView;
 
     private RecipeListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recipes);
+        setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
         BakingDbHelper dbHelper = new BakingDbHelper(this);
@@ -48,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         LayoutInflater inflater = getLayoutInflater();
         mAdapter.setInflater(inflater);
-        mListView.setAdapter(mAdapter);
+        if(mListView != null)
+            mListView.setAdapter(mAdapter);
+        else mGridView.setAdapter(mAdapter);
     }
 
     private class GetRecipesTask extends AsyncTask<Void, Void, String> {
@@ -110,9 +117,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class AddDataToDb extends AsyncTask<String, Void, ArrayList<BakingRecipe>>{
+    private class AddDataToDb extends AsyncTask<String, Void, Void>{
         @Override
-        protected ArrayList<BakingRecipe> doInBackground(String... response) {
+        protected Void doInBackground(String... response) {
             ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
 
             getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
@@ -132,14 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             return null;
-        }
-
-        // Implement hide circular loader
-        @Override
-        protected void onPostExecute(ArrayList<BakingRecipe> recipesList) {
-            super.onPostExecute(recipesList);
-            // Number in id column of RECIPES_TABLE starts with 1
-//            GetIngredientsListService.retrieveIngredientsList(MainActivity.this, 1);
         }
 
         private void addRecipesToDb(BakingRecipe recipe){

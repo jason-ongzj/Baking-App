@@ -4,8 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:background="@android:color/black"
+    android:layout_height="match_parent"
     android:keepScreenOn="true">
 
     <TextView
@@ -14,8 +14,8 @@
         android:layout_height="200dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
         android:layout_marginStart="24dp"
         android:text="TextView"
         android:textColor="@android:color/white"
@@ -34,19 +34,27 @@
         app:layout_constraintRight_toLeftOf="@+id/Next"
         android:layout_marginRight="8dp"
         app:layout_constraintLeft_toRightOf="@+id/Previous"
-        android:layout_marginLeft="8dp" />
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/Media"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="205dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/StepDescription"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"></com.google.android.exoplayer2.ui.SimpleExoPlayerView>
+        app:layout_constraintVertical_bias="1.0"/>
+
+        <!--<ImageView-->
+            <!--android:id="@+id/Media_image"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"/>-->
+    <!--</com.google.android.exoplayer2.ui.SimpleExoPlayerView>-->
 
     <Button
         android:id="@+id/Next"
@@ -58,7 +66,8 @@
         android:textSize="12sp"
         android:background="@drawable/bg_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="8dp" />
 
     <Button
         android:id="@+id/Previous"
@@ -69,6 +78,7 @@
         android:textSize="12sp"
         android:background="@drawable/bg_button"
         app:layout_constraintBaseline_toBaselineOf="@+id/Next"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="8dp" />
 
 </android.support.constraint.ConstraintLayout>
