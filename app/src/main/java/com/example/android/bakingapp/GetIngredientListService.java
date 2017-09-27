@@ -69,7 +69,6 @@ public class GetIngredientListService extends IntentService {
                     handleActionUpdateIngredientsListWidget();
                     break;
             }
-
         }
     }
 

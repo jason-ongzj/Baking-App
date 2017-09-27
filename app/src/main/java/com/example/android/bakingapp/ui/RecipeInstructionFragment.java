@@ -47,12 +47,15 @@ public class RecipeInstructionFragment extends Fragment
     @BindView(R.id.Media) SimpleExoPlayerView mPlayerView;
     @Nullable
     @BindView(R.id.StepDescription) TextView mDescriptionTextView;
+    @Nullable
+    @BindView(R.id.Previous) Button previousButton;
+    @Nullable
+    @BindView(R.id.Next) Button nextButton;
     private Unbinder unbinder;
 
     private int position;
     private int itemCount;
     private Cursor mCursor;
-    private View rootView;
 
     private SimpleExoPlayer mExoPlayer;
     private String mUriString;
@@ -67,7 +70,6 @@ public class RecipeInstructionFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-            rootView.setVisibility(View.VISIBLE);
             position = savedInstanceState.getInt("AdapterPosition");
             itemCount = savedInstanceState.getInt("ItemCount");
             mDescription = savedInstanceState.getString("Description");
@@ -75,13 +77,16 @@ public class RecipeInstructionFragment extends Fragment
             mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
             mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
 
-            checkPortraitOrLandscape(rootView);
+            checkPortraitOrLandscape();
             initializePlayer(position);
-            mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
-            mExoPlayer.setPlayWhenReady(true);
+
+            if(mExoPlayer != null) {
+                mPlayerView.setVisibility(View.VISIBLE);
+                mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
+                mExoPlayer.setPlayWhenReady(true);
+            }
         } else {
             if (!mTwoPane) {
-                rootView.setVisibility(View.VISIBLE);
                 Bundle bundle = getActivity().getIntent().getExtras();
                 if (bundle != null) {
                     String[] intentString = bundle.getStringArray("InstructionSet");
@@ -94,7 +99,7 @@ public class RecipeInstructionFragment extends Fragment
                 }
                 // Check if this is landscape or portrait mode. Buttons and textView
                 // are absent in landscape mode.
-                checkPortraitOrLandscape(rootView);
+                checkPortraitOrLandscape();
                 initializePlayer(position);
                 mExoPlayer.setPlayWhenReady(true);
             }
@@ -102,9 +107,10 @@ public class RecipeInstructionFragment extends Fragment
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
+        // mTwoPane to be determined first before doing initialization of views
         if (getActivity() instanceof RecipeDisplayActivity){
             if(((RecipeDisplayActivity) getActivity()).isTwoPane()) {
                 mTwoPane = ((RecipeDisplayActivity) getActivity()).isTwoPane();
@@ -125,9 +131,7 @@ public class RecipeInstructionFragment extends Fragment
         unbinder.unbind();
     }
 
-    public void checkPortraitOrLandscape(View rootView){
-        final Button previousButton = (Button) rootView.findViewById(R.id.Previous);
-        final Button nextButton = (Button) rootView.findViewById(R.id.Next);
+    public void checkPortraitOrLandscape(){
         if (nextButton != null && previousButton != null) {
             if (position == 0) {
                 previousButton.setVisibility(View.INVISIBLE);
@@ -177,10 +181,12 @@ public class RecipeInstructionFragment extends Fragment
             });
         }
         if (mDescriptionTextView != null) {
+            mDescriptionTextView.setVisibility(View.VISIBLE);
             mDescriptionTextView.setText(mDescription);
         }
     }
 
+    // Function applies only for sw600 layout
     public void updateFragmentViews(){
         String[] recipeData = mCallback.getStringData();
         int[] adapterData = mCallback.getAdapterData();
@@ -192,7 +198,9 @@ public class RecipeInstructionFragment extends Fragment
         itemCount = adapterData[1];
 
         mDescriptionTextView.setText(mDescription);
-        rootView.setVisibility(View.VISIBLE);
+        mDescriptionTextView.setVisibility(View.VISIBLE);
+        mPlayerView.setVisibility(View.VISIBLE);
+
         releasePlayer();
         initializePlayer(position);
         mExoPlayer.setPlayWhenReady(true);
@@ -206,11 +214,9 @@ public class RecipeInstructionFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-//        long seekTime = 0;
         if(mExoPlayer != null){
             outState.putLong("SeekTime", mExoPlayer.getCurrentPosition());
         }
-
         outState.putInt("AdapterPosition", position);
         outState.putInt("ItemCount", itemCount);
         outState.putString("Description", mDescription);
@@ -224,7 +230,7 @@ public class RecipeInstructionFragment extends Fragment
     }
 
     private void initializePlayer(int position){
-        if (mExoPlayer == null){
+        if (mExoPlayer == null && mUriString != null){
             TrackSelection.Factory videoTrackSelectionFactory =
                     new AdaptiveVideoTrackSelection.Factory(new DefaultBandwidthMeter());
             TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
