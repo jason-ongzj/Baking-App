@@ -115,7 +115,7 @@ public class RecipeInstructionFragment extends Fragment
     }
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_instruction_display, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_recipe_instruction, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
         // mTwoPane to be determined first before doing initialization of views

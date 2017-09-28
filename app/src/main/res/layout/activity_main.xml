@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
-
-<ListView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_activity_main"
+    android:name="com.example.android.bakingapp.ui.MainRecipeListFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/recipe_list_view"
-    android:padding="16dp"></ListView>
-</LinearLayout>
+    android:layout_height="match_parent"></fragment>

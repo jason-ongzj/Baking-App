@@ -7,27 +7,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
-import com.example.android.bakingapp.ui.RecipeDisplayActivity;
-
 /**
  * Implementation of App Widget functionality.
  */
 public class BakingAppWidgetProvider extends AppWidgetProvider {
 
-    private static RemoteViews mRemoteViews;
-
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId, String ingredientsList, String recipeName) {
 
-        mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.baking_app_widget_provider);
+        RemoteViews mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.baking_app_widget_provider);
         mRemoteViews.setTextViewText(R.id.recipeName, recipeName);
         mRemoteViews.setTextViewText(R.id.ingredientsList, ingredientsList);
-
-        Intent intent = new Intent(context, RecipeDisplayActivity.class);
-        intent.putExtra("recipe", recipeName);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mRemoteViews.setOnClickPendingIntent(R.id.ingredientsList, pendingIntent);
 
         Intent onPrev_intent = new Intent(context, GetIngredientListService.class);
         onPrev_intent.setAction(GetIngredientListService.GET_PREVIOUS_INGREDIENT_LIST);
@@ -47,7 +37,6 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
         GetIngredientListService.retrieveIngredientsList(context);
     }
 

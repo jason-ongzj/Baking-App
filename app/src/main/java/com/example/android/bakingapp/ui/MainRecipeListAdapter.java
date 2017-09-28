@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RecipeListAdapter extends BaseAdapter {
+public class MainRecipeListAdapter extends BaseAdapter {
 
     @BindView(R.id.card_display_main_image) ImageView cardDisplayImage;
     @BindView(R.id.card_display_main_text) TextView cardDisplayText;
@@ -35,7 +35,7 @@ public class RecipeListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public RecipeListAdapter(Context context){
+    public MainRecipeListAdapter(Context context){
         mContext = context;
     }
 

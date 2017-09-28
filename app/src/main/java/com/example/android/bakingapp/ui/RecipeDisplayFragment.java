@@ -44,7 +44,7 @@ public class RecipeDisplayFragment extends Fragment implements
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_recipe_steps, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_recipe_display, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
