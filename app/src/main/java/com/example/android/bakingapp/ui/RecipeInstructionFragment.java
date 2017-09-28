@@ -3,9 +3,8 @@ package com.example.android.bakingapp.ui;
 import android.app.Fragment;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -17,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
-import com.example.android.bakingapp.data.BakingContract;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -38,8 +36,6 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-
-import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,6 +62,7 @@ public class RecipeInstructionFragment extends Fragment
     private int itemCount;
     private Cursor mCursor;
     private Bitmap thumbnailBitmap;
+    private String mBitmapFile;
 
     private SimpleExoPlayer mExoPlayer;
     private String mUriString;
@@ -81,13 +78,14 @@ public class RecipeInstructionFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-
+            mRecipe = savedInstanceState.getString("RecipeName");
             position = savedInstanceState.getInt("AdapterPosition");
             itemCount = savedInstanceState.getInt("ItemCount");
             mDescription = savedInstanceState.getString("Description");
             mUriString = savedInstanceState.getString("VideoURL");
             mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
             mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
+            mBitmapFile = savedInstanceState.getString("Bitmap");
 
             checkPortraitOrLandscape();
             long seekTime = savedInstanceState.getLong("SeekTime");
@@ -103,11 +101,14 @@ public class RecipeInstructionFragment extends Fragment
                     mDescription = intentString[0];
                     mUriString = intentString[1];
                     mThumbnailUri = intentString[2];
+                    mRecipe = bundle.getString("RecipeName");
+                    mBitmapFile = bundle.getString("Bitmap");
                     Log.d(TAG, "onCreateView: " + Integer.toString(position));
                 }
                 // Check if this is landscape or portrait mode. Buttons and textView
                 // are absent in landscape mode.
                 checkPortraitOrLandscape();
+
                 checkIfVideoPresentElsePutImage(0);
             }
         }
@@ -129,31 +130,6 @@ public class RecipeInstructionFragment extends Fragment
                 }
             }
         }
-
-        if(savedInstanceState != null) {
-            // On rotation state
-            mRecipe = savedInstanceState.getString("RecipeName");
-            new GetBitmapTask().execute();
-        } else {
-            // Tablet layout
-//            if (mCallback != null){
-//                String[] recipeData = mCallback.getStringData();
-//                Log.d(TAG, "onCreateView: " + recipeData.length);
-//                mRecipe = recipeData[3];
-//            }
-            // Phone layout
-//            else {
-            if(mCallback == null){
-                Bundle bundle = getActivity().getIntent().getExtras();
-                mRecipe = bundle.getString("RecipeName");
-                new GetBitmapTask().execute();
-            }
-        }
-
-        // Set thumbnail bitmap asynchronously before instantiation of views so that retrieval of
-        // bitmap is instant when loaded
-
-
         return rootView;
     }
 
@@ -229,6 +205,7 @@ public class RecipeInstructionFragment extends Fragment
             mExoPlayer.setPlayWhenReady(true);
         } else {
             mPlayerView.setVisibility(View.VISIBLE);
+            thumbnailBitmap = BitmapFactory.decodeFile(mBitmapFile);
             mImageView.setImageBitmap(thumbnailBitmap);
             mImageView.setVisibility(View.VISIBLE);
         }
@@ -246,7 +223,8 @@ public class RecipeInstructionFragment extends Fragment
         position = adapterData[0];
         itemCount = adapterData[1];
 
-        new GetBitmapTask().execute();
+        mBitmapFile = mCallback.getBitmap();
+        thumbnailBitmap = BitmapFactory.decodeFile(mBitmapFile);
 
         mDescriptionTextView.setText(mDescription);
         mDescriptionTextView.setVisibility(View.VISIBLE);
@@ -274,6 +252,7 @@ public class RecipeInstructionFragment extends Fragment
         outState.putString("ThumbnailURL", mThumbnailUri);
         outState.putBoolean("TwoPaneMode", mTwoPane);
         outState.putString("RecipeName", mRecipe);
+        outState.putString("Bitmap", mBitmapFile);
     }
 
     public void destroyCursor(){
@@ -311,42 +290,6 @@ public class RecipeInstructionFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         releasePlayer();
-    }
-
-    private String queryLastVideoUrl(){
-        Cursor cursor = getActivity().getContentResolver().query(
-                BakingContract.BakingEntry.STEPS_URI,
-                null,
-                "name=?",
-                new String[]{mRecipe},
-                null
-        );
-        cursor.moveToLast();
-        String lastVideoUrl = (!cursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL).equals("")) ?
-                cursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL) :
-                cursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
-        return lastVideoUrl;
-    }
-
-    private class GetBitmapTask extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected Void doInBackground(Void... params) {
-            String bitmapURL = queryLastVideoUrl();
-            Log.d(TAG, "doInBackground: " + bitmapURL);
-            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-            metadataRetriever.setDataSource(bitmapURL, new HashMap<String, String>());
-            thumbnailBitmap = metadataRetriever.getFrameAtTime(0);
-            metadataRetriever.release();
-            if(thumbnailBitmap == null)
-                Log.d(TAG, "onCreateView: thumbnail not found");
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            mImageView.setImageBitmap(thumbnailBitmap);
-        }
     }
 
     @Override

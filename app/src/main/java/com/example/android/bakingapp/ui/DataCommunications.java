@@ -6,4 +6,5 @@ public interface DataCommunications {
     public int[] getAdapterData();
     public void setAdapterData(int position, int adapterCount);
     public RecipeInstructionFragment getInstructionFragment();
+    public String getBitmap();
 }

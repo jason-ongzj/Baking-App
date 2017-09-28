@@ -33,6 +33,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
     private String recipeName;
     private Fragment recipeDisplayFragment;
     private RecipeInstructionFragment recipeInstructionFragment;
+    private String mThumbnailBitmap;
 
     private String[] mRecipeData;
     private int[] mAdapterData;
@@ -66,6 +67,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
             recipeName = "Nutella Pie";
         } else {
             recipeName = getIntent().getExtras().getString("recipe");
+            mThumbnailBitmap = getIntent().getExtras().getString("Bitmap");
         }
 
         recipeDisplayFragment = getFragmentManager().findFragmentById(R.id.fragment_recipe_display);
@@ -155,7 +157,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
             recipeInstructionFragment.destroyCursor();
         }
     }
-
+    // Interface functions only applicable in a 2-pane mode
     @Override
     public String[] getStringData() {
         return mRecipeData;
@@ -176,9 +178,14 @@ public class RecipeDisplayActivity extends AppCompatActivity
         mAdapterData = new int[]{position, adapterCount};
     }
 
-    // Only applicable in a 2-pane mode
+
     @Override
     public RecipeInstructionFragment getInstructionFragment() {
         return recipeInstructionFragment;
+    }
+
+    @Override
+    public String getBitmap() {
+        return mThumbnailBitmap;
     }
 }

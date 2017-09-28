@@ -77,6 +77,7 @@ public class RecipeDisplayFragment extends Fragment implements
             intent.putExtra("ItemCount", mAdapter.getItemCount());
             intent.putExtra("ItemPosition", position);
             intent.putExtra("RecipeName", mAdapter.getRecipe());
+            intent.putExtra("Bitmap", mCallback.getBitmap());
             startActivity(intent);
 
         } else {

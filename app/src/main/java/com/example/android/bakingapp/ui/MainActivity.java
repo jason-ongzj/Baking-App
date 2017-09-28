@@ -1,9 +1,14 @@
 package com.example.android.bakingapp.ui;
 
 import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,16 +26,21 @@ import com.example.android.bakingapp.utils.BakingDbUtils;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<String>{
 
     @Nullable
     @BindView(R.id.recipe_list_view) ListView mListView;
@@ -38,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.recipe_grid_view) GridView mGridView;
 
     private RecipeListAdapter mAdapter;
+    private ArrayList<Bitmap> mBitmapArrayList = new ArrayList<Bitmap>();
+    private ArrayList<String> mRecipeNameList = new ArrayList<String>();
+    private ArrayList<String> mBitmapFiles = new ArrayList<String>();
+
+    private static final int LOADER_ID = 333;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +62,11 @@ public class MainActivity extends AppCompatActivity {
 
         BakingDbHelper dbHelper = new BakingDbHelper(this);
         dbHelper.getWritableDatabase();
-        new GetRecipesTask().execute();
+
+        LoaderManager.LoaderCallbacks<String> callback = MainActivity.this;
+        Bundle bundleForLoader = null;
+        if(savedInstanceState == null)
+            getSupportLoaderManager().initLoader(LOADER_ID, bundleForLoader, callback);
 
         mAdapter = new RecipeListAdapter(MainActivity.this);
 
@@ -56,6 +75,21 @@ public class MainActivity extends AppCompatActivity {
         if(mListView != null)
             mListView.setAdapter(mAdapter);
         else mGridView.setAdapter(mAdapter);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList("RecipeNameList", mRecipeNameList);
+        outState.putStringArrayList("BitmapFiles", mBitmapFiles);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mRecipeNameList = savedInstanceState.getStringArrayList("RecipeNameList");
+        mBitmapFiles = savedInstanceState.getStringArrayList("BitmapFiles");
+        mAdapter.setRecipes(mRecipeNameList, mBitmapFiles);
     }
 
     private class GetRecipesTask extends AsyncTask<Void, Void, String> {
@@ -108,12 +142,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(String response) {
-            try{
-                new AddDataToDb().execute(response);
-                mAdapter.setRecipes(BakingDbUtils.getRecipeNamesFromJSON(response));
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
+            new AddDataToDb().execute(response);
+            new GetBitmapArray().execute(response);
         }
     }
 
@@ -181,5 +211,123 @@ public class MainActivity extends AppCompatActivity {
                 getContentResolver().insert(BakingContract.BakingEntry.STEPS_URI, contentValues);
             }
         }
+    }
+
+    private class GetBitmapArray extends AsyncTask<String, Void, Void>{
+
+        @Override
+        protected Void doInBackground(String... response) {
+            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
+            try{
+                recipesList = BakingDbUtils.getRecipesFromJSON(response[0]);
+                mRecipeNameList = BakingDbUtils.getRecipeNamesFromJSON(response[0]);
+                for (int i = 0; i < recipesList.size(); i++){
+                    BakingRecipe recipe = recipesList.get(i);
+                    RecipeSteps step = recipe.stepsList.get(recipe.stepsList.size()-1);
+                    String videoURL = (!step.getVideoURL().equals("")) ?
+                            step.getVideoURL() : step.getThumbnailURL();
+
+                    MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+                    metadataRetriever.setDataSource(videoURL, new HashMap<String, String>());
+                    Bitmap thumbnail = metadataRetriever.getFrameAtTime(0);
+                    mBitmapArrayList.add(i, thumbnail);
+                    metadataRetriever.release();
+
+                    try {
+                        String filename = "newImage" + Integer.toString(i) + ".png";
+                        File f = new File(getApplicationContext().getCacheDir(), filename);
+                        f.createNewFile();
+
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        thumbnail.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                        byte[] bitmapdata = bos.toByteArray();
+
+                        FileOutputStream fos = new FileOutputStream(f);
+                        fos.write(bitmapdata);
+                        fos.flush();
+                        fos.close();
+                        mBitmapFiles.add(i, f.getAbsolutePath());
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mAdapter.setRecipes(mRecipeNameList, mBitmapFiles);
+        }
+    }
+
+    @Override
+    public Loader<String> onCreateLoader(int id, Bundle args) {
+
+        return new AsyncTaskLoader<String>(this) {
+            final String TAG = "AsyncTaskLoader";
+            final String REQUEST_METHOD = "GET";
+            final int READ_TIMEOUT = 15000;
+            final int CONNECTION_TIMEOUT = 15000;
+
+            @Override
+            public String loadInBackground() {
+                Log.d(TAG, "doInBackground: ");
+                String urlString = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+                HttpURLConnection urlConnection = null;
+
+                try {
+                    URL url = new URL(urlString);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+
+                    urlConnection.setRequestMethod(REQUEST_METHOD);
+                    urlConnection.setReadTimeout(READ_TIMEOUT);
+                    urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+
+                    urlConnection.connect();
+
+                    InputStreamReader streamReader = new InputStreamReader(urlConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(streamReader);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                    bufferedReader.close();
+                    streamReader.close();
+
+                    return stringBuilder.toString();
+
+                } catch(IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                finally {
+                    if(urlConnection != null){
+                        urlConnection.disconnect();
+                    }
+                }
+            }
+
+            @Override
+            public void deliverResult(String result) {
+                new AddDataToDb().execute(result);
+                new GetBitmapArray().execute(result);
+                super.deliverResult(result);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String> loader, String data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String> loader) {
+
     }
 }

@@ -20,6 +20,7 @@ import static org.hamcrest.core.IsNot.not;
 
 @RunWith(AndroidJUnit4.class)
 public class RecipeDisplayActivityTest {
+    // Testing for portrait mode
 
     public static final String description3 = "3. Press the cookie crumb mixture into the prepared " +
             "pie pan and bake for 12 minutes. Let crust cool to room temperature.";
