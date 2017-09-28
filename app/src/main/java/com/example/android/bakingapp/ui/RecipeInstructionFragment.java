@@ -2,7 +2,10 @@ package com.example.android.bakingapp.ui;
 
 import android.app.Fragment;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -10,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.bakingapp.R;
+import com.example.android.bakingapp.data.BakingContract;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -34,6 +39,8 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.HashMap;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -43,6 +50,8 @@ public class RecipeInstructionFragment extends Fragment
 
     public static final String TAG = "RecipeInstruction";
 
+    @Nullable
+    @BindView(R.id.Media_image) ImageView mImageView;
     @Nullable
     @BindView(R.id.Media) SimpleExoPlayerView mPlayerView;
     @Nullable
@@ -56,11 +65,13 @@ public class RecipeInstructionFragment extends Fragment
     private int position;
     private int itemCount;
     private Cursor mCursor;
+    private Bitmap thumbnailBitmap;
 
     private SimpleExoPlayer mExoPlayer;
     private String mUriString;
     private String mDescription;
     private String mThumbnailUri;
+    private String mRecipe;
     private MediaSource mMediaSource;
     private boolean mTwoPane;
 
@@ -70,6 +81,7 @@ public class RecipeInstructionFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
+
             position = savedInstanceState.getInt("AdapterPosition");
             itemCount = savedInstanceState.getInt("ItemCount");
             mDescription = savedInstanceState.getString("Description");
@@ -78,13 +90,9 @@ public class RecipeInstructionFragment extends Fragment
             mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
 
             checkPortraitOrLandscape();
-            initializePlayer(position);
+            long seekTime = savedInstanceState.getLong("SeekTime");
+            checkIfVideoPresentElsePutImage(seekTime);
 
-            if(mExoPlayer != null) {
-                mPlayerView.setVisibility(View.VISIBLE);
-                mExoPlayer.seekTo(savedInstanceState.getLong("SeekTime"));
-                mExoPlayer.setPlayWhenReady(true);
-            }
         } else {
             if (!mTwoPane) {
                 Bundle bundle = getActivity().getIntent().getExtras();
@@ -100,8 +108,7 @@ public class RecipeInstructionFragment extends Fragment
                 // Check if this is landscape or portrait mode. Buttons and textView
                 // are absent in landscape mode.
                 checkPortraitOrLandscape();
-                initializePlayer(position);
-                mExoPlayer.setPlayWhenReady(true);
+                checkIfVideoPresentElsePutImage(0);
             }
         }
     }
@@ -122,6 +129,31 @@ public class RecipeInstructionFragment extends Fragment
                 }
             }
         }
+
+        if(savedInstanceState != null) {
+            // On rotation state
+            mRecipe = savedInstanceState.getString("RecipeName");
+            new GetBitmapTask().execute();
+        } else {
+            // Tablet layout
+//            if (mCallback != null){
+//                String[] recipeData = mCallback.getStringData();
+//                Log.d(TAG, "onCreateView: " + recipeData.length);
+//                mRecipe = recipeData[3];
+//            }
+            // Phone layout
+//            else {
+            if(mCallback == null){
+                Bundle bundle = getActivity().getIntent().getExtras();
+                mRecipe = bundle.getString("RecipeName");
+                new GetBitmapTask().execute();
+            }
+        }
+
+        // Set thumbnail bitmap asynchronously before instantiation of views so that retrieval of
+        // bitmap is instant when loaded
+
+
         return rootView;
     }
 
@@ -129,6 +161,7 @@ public class RecipeInstructionFragment extends Fragment
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+        releasePlayer();
     }
 
     public void checkPortraitOrLandscape(){
@@ -154,9 +187,9 @@ public class RecipeInstructionFragment extends Fragment
                         mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
                         mDescriptionTextView.setText(mDescription);
                         mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
+                        mThumbnailUri = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
                         releasePlayer();
-                        initializePlayer(position);
-                        mExoPlayer.setPlayWhenReady(true);
+                        checkIfVideoPresentElsePutImage(0);
                     }
                     if (position == 0) previousButton.setVisibility(View.INVISIBLE);
                 }
@@ -172,9 +205,9 @@ public class RecipeInstructionFragment extends Fragment
                         mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
                         mDescriptionTextView.setText(mDescription);
                         mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
+                        mThumbnailUri = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
                         releasePlayer();
-                        initializePlayer(position);
-                        mExoPlayer.setPlayWhenReady(true);
+                        checkIfVideoPresentElsePutImage(0);
                     }
                     if (position == itemCount - 1) nextButton.setVisibility(View.INVISIBLE);
                 }
@@ -186,6 +219,21 @@ public class RecipeInstructionFragment extends Fragment
         }
     }
 
+    private void checkIfVideoPresentElsePutImage(long seekTime){
+        if(mUriString.equals("")){
+            mUriString = mThumbnailUri;
+        }
+        if(!mUriString.equals("")) {
+            initializePlayer(position);
+            mExoPlayer.seekTo(seekTime);
+            mExoPlayer.setPlayWhenReady(true);
+        } else {
+            mPlayerView.setVisibility(View.VISIBLE);
+            mImageView.setImageBitmap(thumbnailBitmap);
+            mImageView.setVisibility(View.VISIBLE);
+        }
+    }
+
     // Function applies only for sw600 layout
     public void updateFragmentViews(){
         String[] recipeData = mCallback.getStringData();
@@ -194,16 +242,18 @@ public class RecipeInstructionFragment extends Fragment
         mDescription = recipeData[0];
         mUriString = recipeData[1];
         mThumbnailUri = recipeData[2];
+        mRecipe = recipeData[3];
         position = adapterData[0];
         itemCount = adapterData[1];
+
+        new GetBitmapTask().execute();
 
         mDescriptionTextView.setText(mDescription);
         mDescriptionTextView.setVisibility(View.VISIBLE);
         mPlayerView.setVisibility(View.VISIBLE);
 
         releasePlayer();
-        initializePlayer(position);
-        mExoPlayer.setPlayWhenReady(true);
+        checkIfVideoPresentElsePutImage(0);
     }
 
     public void setCursor(Cursor cursor){
@@ -223,6 +273,7 @@ public class RecipeInstructionFragment extends Fragment
         outState.putString("VideoURL", mUriString);
         outState.putString("ThumbnailURL", mThumbnailUri);
         outState.putBoolean("TwoPaneMode", mTwoPane);
+        outState.putString("RecipeName", mRecipe);
     }
 
     public void destroyCursor(){
@@ -230,7 +281,8 @@ public class RecipeInstructionFragment extends Fragment
     }
 
     private void initializePlayer(int position){
-        if (mExoPlayer == null && mUriString != null){
+        if (mExoPlayer == null){
+            mImageView.setVisibility(View.GONE);
             TrackSelection.Factory videoTrackSelectionFactory =
                     new AdaptiveVideoTrackSelection.Factory(new DefaultBandwidthMeter());
             TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -240,19 +292,15 @@ public class RecipeInstructionFragment extends Fragment
 
             mExoPlayer.addListener(this);
             String userAgent = Util.getUserAgent(getActivity(), Integer.toString(position));
-            if(!mUriString.matches("")) {
-                mMediaSource = new ExtractorMediaSource(Uri.parse(mUriString), new DefaultDataSourceFactory(
-                        getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-            } else {
-                mMediaSource = new ExtractorMediaSource(Uri.parse(mThumbnailUri), new DefaultDataSourceFactory(
-                        getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-            }
+            mMediaSource = new ExtractorMediaSource(Uri.parse(mUriString), new DefaultDataSourceFactory(
+                    getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
+
             mExoPlayer.prepare(mMediaSource);
         }
     }
 
     private void releasePlayer(){
-        if(mMediaSource!= null) {
+        if(mExoPlayer!= null) {
             mExoPlayer.stop();
             mExoPlayer.release();
         }
@@ -263,6 +311,42 @@ public class RecipeInstructionFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         releasePlayer();
+    }
+
+    private String queryLastVideoUrl(){
+        Cursor cursor = getActivity().getContentResolver().query(
+                BakingContract.BakingEntry.STEPS_URI,
+                null,
+                "name=?",
+                new String[]{mRecipe},
+                null
+        );
+        cursor.moveToLast();
+        String lastVideoUrl = (!cursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL).equals("")) ?
+                cursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL) :
+                cursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
+        return lastVideoUrl;
+    }
+
+    private class GetBitmapTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... params) {
+            String bitmapURL = queryLastVideoUrl();
+            Log.d(TAG, "doInBackground: " + bitmapURL);
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(bitmapURL, new HashMap<String, String>());
+            thumbnailBitmap = metadataRetriever.getFrameAtTime(0);
+            metadataRetriever.release();
+            if(thumbnailBitmap == null)
+                Log.d(TAG, "onCreateView: thumbnail not found");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mImageView.setImageBitmap(thumbnailBitmap);
+        }
     }
 
     @Override

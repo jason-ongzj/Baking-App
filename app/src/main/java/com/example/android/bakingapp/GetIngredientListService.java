@@ -105,7 +105,7 @@ public class GetIngredientListService extends IntentService {
                 null,
                 null);
         String recipe = "";
-        if(cursor != null) {
+        if(cursor.getCount() > 0) {
             cursor.moveToFirst();
             // 1 is the index for recipe name in RECIPES_TABLE
             recipe = cursor.getString(1);

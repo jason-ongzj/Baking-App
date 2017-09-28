@@ -48,13 +48,14 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"/>
+        app:layout_constraintVertical_bias="1.0">
 
-        <!--<ImageView-->
-            <!--android:id="@+id/Media_image"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"/>-->
-    <!--</com.google.android.exoplayer2.ui.SimpleExoPlayerView>-->
+        <ImageView
+            android:id="@+id/Media_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"/>
+    </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
 
     <Button
         android:id="@+id/Next"

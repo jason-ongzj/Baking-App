@@ -10,6 +10,13 @@
         android:id="@+id/Media"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="0dp"></com.google.android.exoplayer2.ui.SimpleExoPlayerView>
+        android:layout_marginBottom="0dp">
+
+        <ImageView
+            android:id="@+id/Media_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"/>
+    </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
 
 </FrameLayout>
