@@ -25,7 +25,7 @@ public class RecipeDisplayFragment extends Fragment implements
     @BindView(R.id.recyclerView_recipeSteps) RecyclerView recyclerView;
     private Unbinder unbinder;
 
-    DataCommunications mCallback;
+    private DataCommunications mCallback;
     private boolean mTwoPane;
     private RecipeDisplayAdapter mAdapter;
 

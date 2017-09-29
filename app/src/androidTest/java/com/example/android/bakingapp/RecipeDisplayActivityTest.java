@@ -22,10 +22,10 @@ import static org.hamcrest.core.IsNot.not;
 public class RecipeDisplayActivityTest {
     // Testing for portrait mode
 
-    public static final String description3 = "3. Press the cookie crumb mixture into the prepared " +
+    private static final String description3 = "3. Press the cookie crumb mixture into the prepared " +
             "pie pan and bake for 12 minutes. Let crust cool to room temperature.";
 
-    public static final String description4 = "4. Beat together the nutella, mascarpone, 1 teaspoon of " +
+    private static final String description4 = "4. Beat together the nutella, mascarpone, 1 teaspoon of " +
             "salt, and 1 tablespoon of vanilla on medium speed in a stand mixer or high speed with a hand mixer until fluffy.";
 
     @Rule

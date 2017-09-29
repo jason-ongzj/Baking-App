@@ -22,7 +22,7 @@ public class RecipeInstructionActivity extends AppCompatActivity
     private String mRecipe;
     private Fragment recipeInstructionFragment;
 
-    public static final int ID_RECIPE_STEPS_LOADER = 156;
+    private static final int ID_RECIPE_STEPS_LOADER = 156;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

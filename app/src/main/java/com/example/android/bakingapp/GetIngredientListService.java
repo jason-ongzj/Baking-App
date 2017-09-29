@@ -24,11 +24,11 @@ public class GetIngredientListService extends IntentService {
             BakingContract.BakingEntry.COLUMN_MEASURE
     };
 
-    public static final int INDEX_RECIPE_INGREDIENT = 0;
-    public static final int INDEX_RECIPE_NAME = 1;
-    public static final int INDEX_INGREDIENT = 2;
-    public static final int INDEX_QUANTITY = 3;
-    public static final int INDEX_MEASURE = 4;
+    private static final int INDEX_RECIPE_INGREDIENT = 0;
+    private static final int INDEX_RECIPE_NAME = 1;
+    private static final int INDEX_INGREDIENT = 2;
+    private static final int INDEX_QUANTITY = 3;
+    private static final int INDEX_MEASURE = 4;
 
     private static int recipeID = 3;
 
@@ -107,8 +107,7 @@ public class GetIngredientListService extends IntentService {
         String recipe = "";
         if(cursor.getCount() > 0) {
             cursor.moveToFirst();
-            // 1 is the index for recipe name in RECIPES_TABLE
-            recipe = cursor.getString(1);
+            recipe = cursor.getString(INDEX_RECIPE_NAME);
             cursor.close();
         }
         return recipe;

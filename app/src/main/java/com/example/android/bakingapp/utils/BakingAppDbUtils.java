@@ -10,11 +10,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class BakingDbUtils {
+public class BakingAppDbUtils {
 
     public static ArrayList<BakingRecipe> getRecipesFromJSON(String response) throws JSONException {
         JSONArray jsonArray = new JSONArray(response);
-        ArrayList<BakingRecipe> bakingRecipes = new ArrayList<BakingRecipe>();
+        ArrayList<BakingRecipe> bakingRecipes = new ArrayList<>();
 
         for(int i = 0; i < jsonArray.length(); i++){
 
@@ -41,7 +41,7 @@ public class BakingDbUtils {
 
     public static ArrayList<String> getRecipeNamesFromJSON(String response) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
-        ArrayList<String> recipeNames = new ArrayList<String>();
+        ArrayList<String> recipeNames = new ArrayList<>();
 
         for(int i = 0; i < jsonArray.length(); i++){
             JSONObject recipeJSON = jsonArray.getJSONObject(i);
@@ -51,7 +51,7 @@ public class BakingDbUtils {
         return recipeNames;
     }
 
-    public static void getIngredientsFromJSON(String response, BakingRecipe recipe) throws JSONException{
+    private static void getIngredientsFromJSON(String response, BakingRecipe recipe) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<Ingredients> ingredientsList = new ArrayList<Ingredients>();
 
@@ -68,7 +68,7 @@ public class BakingDbUtils {
         recipe.ingredientsList = ingredientsList;
     }
 
-    public static void getStepsFromJSON(String response, BakingRecipe recipe) throws JSONException{
+    private static void getStepsFromJSON(String response, BakingRecipe recipe) throws JSONException{
         JSONArray jsonArray = new JSONArray(response);
         ArrayList<RecipeSteps> stepsList = new ArrayList<RecipeSteps>();
 

@@ -20,7 +20,7 @@ import com.example.android.bakingapp.Ingredients;
 import com.example.android.bakingapp.R;
 import com.example.android.bakingapp.RecipeSteps;
 import com.example.android.bakingapp.data.BakingContract;
-import com.example.android.bakingapp.utils.BakingDbUtils;
+import com.example.android.bakingapp.utils.BakingAppDbUtils;
 
 import org.json.JSONException;
 
@@ -50,9 +50,9 @@ public class MainRecipeListFragment extends Fragment {
     GridView mGridView;
 
     private MainRecipeListAdapter mAdapter;
-    private ArrayList<Bitmap> mBitmapArrayList = new ArrayList<Bitmap>();
-    private ArrayList<String> mRecipeNameList = new ArrayList<String>();
-    private ArrayList<String> mBitmapFiles = new ArrayList<String>();
+    private ArrayList<Bitmap> mBitmapArrayList = new ArrayList<>();
+    private ArrayList<String> mRecipeNameList = new ArrayList<>();
+    private ArrayList<String> mBitmapFiles = new ArrayList<>();
 
     @Nullable
     @Override
@@ -87,14 +87,9 @@ public class MainRecipeListFragment extends Fragment {
 
     private class GetRecipesTask extends AsyncTask<Void, Void, String> {
         private static final String TAG = "AsyncTask";
-        public static final String REQUEST_METHOD = "GET";
-        public static final int READ_TIMEOUT = 15000;
-        public static final int CONNECTION_TIMEOUT = 15000;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
+        private static final String REQUEST_METHOD = "GET";
+        private static final int READ_TIMEOUT = 15000;
+        private static final int CONNECTION_TIMEOUT = 15000;
 
         protected String doInBackground(Void... voids) {
             Log.d(TAG, "doInBackground: ");
@@ -142,14 +137,14 @@ public class MainRecipeListFragment extends Fragment {
     private class AddDataToDb extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... response) {
-            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
+            ArrayList<BakingRecipe> recipesList = new ArrayList<>();
 
             getActivity().getContentResolver().delete(BakingContract.BakingEntry.RECIPE_URI, null, null);
             getActivity().getContentResolver().delete(BakingContract.BakingEntry.INGREDIENTS_URI, null, null);
             getActivity().getContentResolver().delete(BakingContract.BakingEntry.STEPS_URI, null, null);
 
             try {
-                recipesList = BakingDbUtils.getRecipesFromJSON(response[0]);
+                recipesList = BakingAppDbUtils.getRecipesFromJSON(response[0]);
 
                 for (int i = 0; i < recipesList.size(); i++) {
                     BakingRecipe recipe = recipesList.get(i);
@@ -209,10 +204,10 @@ public class MainRecipeListFragment extends Fragment {
 
         @Override
         protected Void doInBackground(String... response) {
-            ArrayList<BakingRecipe> recipesList = new ArrayList<BakingRecipe>();
+            ArrayList<BakingRecipe> recipesList = new ArrayList<>();
             try {
-                recipesList = BakingDbUtils.getRecipesFromJSON(response[0]);
-                mRecipeNameList = BakingDbUtils.getRecipeNamesFromJSON(response[0]);
+                recipesList = BakingAppDbUtils.getRecipesFromJSON(response[0]);
+                mRecipeNameList = BakingAppDbUtils.getRecipeNamesFromJSON(response[0]);
                 for (int i = 0; i < recipesList.size(); i++) {
                     BakingRecipe recipe = recipesList.get(i);
                     RecipeSteps step = recipe.stepsList.get(recipe.stepsList.size() - 1);

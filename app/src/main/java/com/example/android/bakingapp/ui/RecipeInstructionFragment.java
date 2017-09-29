@@ -72,7 +72,7 @@ public class RecipeInstructionFragment extends Fragment
     private MediaSource mMediaSource;
     private boolean mTwoPane;
 
-    DataCommunications mCallback;
+    private DataCommunications mCallback;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -140,7 +140,7 @@ public class RecipeInstructionFragment extends Fragment
         releasePlayer();
     }
 
-    public void checkPortraitOrLandscape(){
+    private void checkPortraitOrLandscape(){
         if (nextButton != null && previousButton != null) {
             if (position == 0) {
                 previousButton.setVisibility(View.INVISIBLE);
