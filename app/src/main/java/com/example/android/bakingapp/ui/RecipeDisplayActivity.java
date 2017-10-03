@@ -157,6 +157,7 @@ public class RecipeDisplayActivity extends AppCompatActivity
             recipeInstructionFragment.destroyCursor();
         }
     }
+
     // Interface functions only applicable in a 2-pane mode
     @Override
     public String[] getStringData() {

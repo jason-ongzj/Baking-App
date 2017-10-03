@@ -50,9 +50,9 @@ public class MainRecipeListFragment extends Fragment {
     GridView mGridView;
 
     private MainRecipeListAdapter mAdapter;
-    private ArrayList<Bitmap> mBitmapArrayList = new ArrayList<>();
     private ArrayList<String> mRecipeNameList = new ArrayList<>();
     private ArrayList<String> mBitmapFiles = new ArrayList<>();
+    private ArrayList<String> mImageList = new ArrayList<>();
 
     @Nullable
     @Override
@@ -68,7 +68,7 @@ public class MainRecipeListFragment extends Fragment {
         } else {
             mRecipeNameList = savedInstanceState.getStringArrayList("RecipeNameList");
             mBitmapFiles = savedInstanceState.getStringArrayList("BitmapFiles");
-            mAdapter.setRecipes(mRecipeNameList, mBitmapFiles);
+            mAdapter.setRecipes(mRecipeNameList, mBitmapFiles, mImageList);
         }
 
         if (mListView != null)
@@ -83,6 +83,7 @@ public class MainRecipeListFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList("RecipeNameList", mRecipeNameList);
         outState.putStringArrayList("BitmapFiles", mBitmapFiles);
+        outState.putStringArrayList("ImageList", mImageList);
     }
 
     private class GetRecipesTask extends AsyncTask<Void, Void, String> {
@@ -208,35 +209,38 @@ public class MainRecipeListFragment extends Fragment {
             try {
                 recipesList = BakingAppDbUtils.getRecipesFromJSON(response[0]);
                 mRecipeNameList = BakingAppDbUtils.getRecipeNamesFromJSON(response[0]);
+                mImageList = BakingAppDbUtils.getImagesFromJSON(response[0]);
                 for (int i = 0; i < recipesList.size(); i++) {
                     BakingRecipe recipe = recipesList.get(i);
-                    RecipeSteps step = recipe.stepsList.get(recipe.stepsList.size() - 1);
-                    String videoURL = (!step.getVideoURL().equals("")) ?
-                            step.getVideoURL() : step.getThumbnailURL();
+                    // Check if image is present in JSON response
+                    if(recipe.image.equals("")) {
+                        RecipeSteps step = recipe.stepsList.get(recipe.stepsList.size() - 1);
+                        String videoURL = (!step.getVideoURL().equals("")) ?
+                                step.getVideoURL() : step.getThumbnailURL();
 
-                    MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-                    metadataRetriever.setDataSource(videoURL, new HashMap<String, String>());
-                    Bitmap thumbnail = metadataRetriever.getFrameAtTime(0);
-                    mBitmapArrayList.add(i, thumbnail);
-                    metadataRetriever.release();
+                        MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+                        metadataRetriever.setDataSource(videoURL, new HashMap<String, String>());
+                        Bitmap thumbnail = metadataRetriever.getFrameAtTime(0);
+                        metadataRetriever.release();
 
-                    try {
-                        String filename = "newImage" + Integer.toString(i) + ".png";
-                        File f = new File(getActivity().getCacheDir(), filename);
-                        f.createNewFile();
+                        try {
+                            String filename = "newImage" + Integer.toString(i) + ".png";
+                            File f = new File(getActivity().getFilesDir(), filename);
+                            f.createNewFile();
 
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        thumbnail.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                        byte[] bitmapdata = bos.toByteArray();
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            thumbnail.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                            byte[] bitmapdata = bos.toByteArray();
 
-                        FileOutputStream fos = new FileOutputStream(f);
-                        fos.write(bitmapdata);
-                        fos.flush();
-                        fos.close();
-                        mBitmapFiles.add(i, f.getAbsolutePath());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(bitmapdata);
+                            fos.flush();
+                            fos.close();
+                            mBitmapFiles.add(i, f.getAbsolutePath());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else mBitmapFiles.add(i, "");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -247,7 +251,7 @@ public class MainRecipeListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mAdapter.setRecipes(mRecipeNameList, mBitmapFiles);
+            mAdapter.setRecipes(mRecipeNameList, mBitmapFiles, mImageList);
             mProgressBar.setVisibility(View.INVISIBLE);
         }
     }

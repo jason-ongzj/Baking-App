@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,9 +30,13 @@ public class MainRecipeListAdapter extends BaseAdapter {
     private ArrayList<String> mRecipes;
     private LayoutInflater mInflater;
     private ArrayList<String> mBitmapFiles;
-    public void setRecipes(ArrayList<String> recipes, ArrayList<String> bitmapFiles){
+    private ArrayList<String> mImageList;
+
+
+    public void setRecipes(ArrayList<String> recipes, ArrayList<String> bitmapFiles, ArrayList<String> imageList){
         mRecipes = recipes;
         mBitmapFiles = bitmapFiles;
+        mImageList = imageList;
         notifyDataSetChanged();
     }
 
@@ -65,8 +70,10 @@ public class MainRecipeListAdapter extends BaseAdapter {
             View child = mInflater.inflate(R.layout.item_display_main, null);
             ButterKnife.bind(this, child);
             cardDisplayText.setText(mRecipes.get(position));
-            Bitmap thumbnail = BitmapFactory.decodeFile(mBitmapFiles.get(position));
-            cardDisplayImage.setImageBitmap(thumbnail);
+            if(mImageList.get(position).equals("") || mImageList.get(position) == null) {
+                Bitmap thumbnail = BitmapFactory.decodeFile(mBitmapFiles.get(position));
+                cardDisplayImage.setImageBitmap(thumbnail);
+            } else cardDisplayImage.setImageURI(Uri.parse(mImageList.get(position)));
         } else {
             cardView = (CardView) convertView;
         }

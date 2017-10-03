@@ -65,9 +65,9 @@ public class RecipeInstructionFragment extends Fragment
     private String mBitmapFile;
 
     private SimpleExoPlayer mExoPlayer;
-    private String mUriString;
+    private String mUrlString;
     private String mDescription;
-    private String mThumbnailUri;
+    private String mThumbnailUrl;
     private String mRecipe;
     private MediaSource mMediaSource;
     private boolean mTwoPane;
@@ -82,14 +82,24 @@ public class RecipeInstructionFragment extends Fragment
             position = savedInstanceState.getInt("AdapterPosition");
             itemCount = savedInstanceState.getInt("ItemCount");
             mDescription = savedInstanceState.getString("Description");
-            mUriString = savedInstanceState.getString("VideoURL");
-            mThumbnailUri = savedInstanceState.getString("ThumbnailURL");
+            mUrlString = savedInstanceState.getString("VideoURL");
+            mThumbnailUrl = savedInstanceState.getString("ThumbnailURL");
+
+            // Account for nullpointer exception
+            if(mUrlString == null){
+                mUrlString = "";
+            }
+            if(mThumbnailUrl == null){
+                mThumbnailUrl = "";
+            }
+
             mTwoPane = savedInstanceState.getBoolean("TwoPaneMode");
             mBitmapFile = savedInstanceState.getString("Bitmap");
 
             checkPortraitOrLandscape();
             long seekTime = savedInstanceState.getLong("SeekTime");
             checkIfVideoPresentElsePutImage(seekTime);
+            Log.d(TAG, "onActivityCreated: ");
 
         } else {
             if (!mTwoPane) {
@@ -99,8 +109,8 @@ public class RecipeInstructionFragment extends Fragment
                     position = bundle.getInt("ItemPosition");
                     itemCount = bundle.getInt("ItemCount");
                     mDescription = intentString[0];
-                    mUriString = intentString[1];
-                    mThumbnailUri = intentString[2];
+                    mUrlString = intentString[1];
+                    mThumbnailUrl = intentString[2];
                     mRecipe = bundle.getString("RecipeName");
                     mBitmapFile = bundle.getString("Bitmap");
                     Log.d(TAG, "onCreateView: " + Integer.toString(position));
@@ -137,7 +147,8 @@ public class RecipeInstructionFragment extends Fragment
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
-        releasePlayer();
+//        releasePlayer();
+        Log.d(TAG, "onDestroyView:");
     }
 
     private void checkPortraitOrLandscape(){
@@ -162,8 +173,8 @@ public class RecipeInstructionFragment extends Fragment
                         position = position - 1;
                         mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
                         mDescriptionTextView.setText(mDescription);
-                        mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
-                        mThumbnailUri = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
+                        mUrlString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
+                        mThumbnailUrl = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
                         releasePlayer();
                         checkIfVideoPresentElsePutImage(0);
                     }
@@ -180,8 +191,8 @@ public class RecipeInstructionFragment extends Fragment
                         position = position + 1;
                         mDescription = mCursor.getString(RecipeDisplayActivity.INDEX_DESCRIPTION);
                         mDescriptionTextView.setText(mDescription);
-                        mUriString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
-                        mThumbnailUri = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
+                        mUrlString = mCursor.getString(RecipeDisplayActivity.INDEX_VIDEO_URL);
+                        mThumbnailUrl = mCursor.getString(RecipeDisplayActivity.INDEX_THUMBNAIL_URL);
                         releasePlayer();
                         checkIfVideoPresentElsePutImage(0);
                     }
@@ -196,16 +207,20 @@ public class RecipeInstructionFragment extends Fragment
     }
 
     private void checkIfVideoPresentElsePutImage(long seekTime){
-        if(mUriString.equals("")){
-            mUriString = mThumbnailUri;
-        }
-        if(!mUriString.equals("")) {
+//        if(mUrlString.equals("")){
+//            mUrlString = mThumbnailUrl;
+//        }
+        if(!mUrlString.equals("")) {
             initializePlayer(position);
             mExoPlayer.seekTo(seekTime);
             mExoPlayer.setPlayWhenReady(true);
         } else {
             mPlayerView.setVisibility(View.VISIBLE);
-            thumbnailBitmap = BitmapFactory.decodeFile(mBitmapFile);
+            releasePlayer();
+            thumbnailBitmap = BitmapFactory.decodeFile(mThumbnailUrl);
+            if(thumbnailBitmap == null) {
+                thumbnailBitmap = BitmapFactory.decodeFile(mBitmapFile);
+            }
             mImageView.setImageBitmap(thumbnailBitmap);
             mImageView.setVisibility(View.VISIBLE);
         }
@@ -217,8 +232,8 @@ public class RecipeInstructionFragment extends Fragment
         int[] adapterData = mCallback.getAdapterData();
 
         mDescription = recipeData[0];
-        mUriString = recipeData[1];
-        mThumbnailUri = recipeData[2];
+        mUrlString = recipeData[1];
+        mThumbnailUrl = recipeData[2];
         mRecipe = recipeData[3];
         position = adapterData[0];
         itemCount = adapterData[1];
@@ -248,8 +263,8 @@ public class RecipeInstructionFragment extends Fragment
         outState.putInt("AdapterPosition", position);
         outState.putInt("ItemCount", itemCount);
         outState.putString("Description", mDescription);
-        outState.putString("VideoURL", mUriString);
-        outState.putString("ThumbnailURL", mThumbnailUri);
+        outState.putString("VideoURL", mUrlString);
+        outState.putString("ThumbnailURL", mThumbnailUrl);
         outState.putBoolean("TwoPaneMode", mTwoPane);
         outState.putString("RecipeName", mRecipe);
         outState.putString("Bitmap", mBitmapFile);
@@ -271,19 +286,29 @@ public class RecipeInstructionFragment extends Fragment
 
             mExoPlayer.addListener(this);
             String userAgent = Util.getUserAgent(getActivity(), Integer.toString(position));
-            mMediaSource = new ExtractorMediaSource(Uri.parse(mUriString), new DefaultDataSourceFactory(
+            mMediaSource = new ExtractorMediaSource(Uri.parse(mUrlString), new DefaultDataSourceFactory(
                     getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
 
             mExoPlayer.prepare(mMediaSource);
         }
     }
 
-    private void releasePlayer(){
+    public void releasePlayer(){
         if(mExoPlayer!= null) {
             mExoPlayer.stop();
             mExoPlayer.release();
         }
         mExoPlayer = null;
+        if(mPlayerView != null)
+            mPlayerView.setPlayer(null);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mExoPlayer!= null) {
+            mExoPlayer.setPlayWhenReady(false);
+        }
     }
 
     @Override

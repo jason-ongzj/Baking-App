@@ -87,4 +87,16 @@ public class BakingAppDbUtils {
 
         recipe.stepsList = stepsList;
     }
+
+    public static ArrayList<String> getImagesFromJSON(String response) throws JSONException{
+        JSONArray jsonArray = new JSONArray(response);
+        ArrayList<String> recipeNames = new ArrayList<>();
+
+        for(int i = 0; i < jsonArray.length(); i++){
+            JSONObject recipeJSON = jsonArray.getJSONObject(i);
+            recipeNames.add(i, recipeJSON.getString("image"));
+        }
+
+        return recipeNames;
+    }
 }
